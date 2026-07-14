@@ -1,0 +1,185 @@
+# 🏗️ System Architecture
+
+# Smart Traffic Management System
+
+## 📖 Overview
+
+The Smart Traffic Management System follows a modular architecture where each component performs a specific responsibility.
+
+---
+
+# Architecture
+
+Camera
+
+↓
+
+Vehicle Detection (OpenCV + YOLO)
+
+↓
+
+Flask Backend
+
+↓
+
+MySQL Database
+
+↓
+
+Traffic Signal Controller
+
+↓
+
+Dashboard
+
+---
+
+# Modules
+
+## 1. Authentication Module
+
+Responsibilities:
+
+- Login
+- Logout
+- User Management
+
+---
+
+## 2. Vehicle Detection Module
+
+Responsibilities:
+
+- Detect Vehicles
+- Count Vehicles
+- Identify Vehicle Types
+
+Technology:
+
+- OpenCV
+- YOLO
+
+---
+
+## 3. Signal Controller Module
+
+Responsibilities:
+
+- Calculate Green Signal Time
+- Manage Signal Timing
+- Dynamic Signal Control
+
+---
+
+## 4. Database Module
+
+Responsibilities:
+
+- Store Traffic Data
+- Store Vehicle Logs
+- Generate Reports
+
+Technology:
+
+- MySQL
+
+---
+
+## 5. Dashboard Module
+
+Responsibilities:
+
+- Live Vehicle Count
+- Signal Status
+- Traffic Analytics
+- Historical Reports
+
+---
+
+# Technology Stack
+
+Frontend
+
+- HTML
+- CSS
+- Bootstrap
+- JavaScript
+
+Backend
+
+- Python
+- Flask
+
+Database
+
+- MySQL
+
+AI
+
+- OpenCV
+- YOLO
+
+Version Control
+
+- Git
+- GitHub
+
+---
+
+# Data Flow
+
+Vehicle
+
+↓
+
+Camera
+
+↓
+
+OpenCV + YOLO
+
+↓
+
+Vehicle Count
+
+↓
+
+Flask API
+
+↓
+
+MySQL Database
+
+↓
+
+Traffic Dashboard
+
+↓
+
+Traffic Signal Timing
+
+---
+
+# Advantages
+
+- Modular Design
+- Easy Maintenance
+- Scalable Architecture
+- AI Integration
+- Real-time Processing
+
+---
+
+# Future Improvements
+
+- Cloud Deployment
+- IoT Integration
+- Mobile Application
+- AI Prediction
+- Emergency Vehicle Priority
+
+---
+
+## Status
+
+✅ Architecture Planning Completed

@@ -124,12 +124,14 @@ The research focuses on:
 
 ## 📚 Documentation
 
-Detailed project documentation is available in the `docs/` directory.
+The project documentation includes:
 
-* 📄 Problem Statement
-* 📄 Requirements
-* 📄 Research
-* 📄 Roadmap
+- Problem Statement
+- Requirements
+- Research
+- Roadmap
+- Database Design
+- System Architecture
 
 ---
 
