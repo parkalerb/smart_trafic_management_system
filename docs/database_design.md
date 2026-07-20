@@ -4,7 +4,7 @@
 
 ## 📖 Overview
 
-The database is designed to store information related to users, traffic signals, vehicles, and traffic logs. It supports real-time traffic monitoring and future analytics.
+The database stores information related to traffic signals, detected vehicles, users, and traffic logs. It is designed to support real-time monitoring and future AI-based traffic analysis.
 
 ---
 
@@ -14,98 +14,153 @@ MySQL
 
 ---
 
-# Tables
+# Entities
 
 ## 1. Users
 
-Purpose:
-Store administrator and operator information.
+Stores administrator and operator information.
 
-| Column | Data Type | Description |
-|---------|-----------|-------------|
-| id | INT | Primary Key |
-| name | VARCHAR(100) | User Name |
-| email | VARCHAR(100) | Email Address |
-| password | VARCHAR(255) | Encrypted Password |
-| role | VARCHAR(30) | Admin / Operator |
+### Attributes
+
+- user_id (Primary Key)
+- name
+- email
+- password
+- role
 
 ---
 
 ## 2. Traffic Signals
 
-Purpose:
-Store traffic signal information.
+Stores traffic signal details.
 
-| Column | Data Type | Description |
-|---------|-----------|-------------|
-| signal_id | INT | Primary Key |
-| location | VARCHAR(100) | Signal Location |
-| green_time | INT | Green Signal Time |
-| yellow_time | INT | Yellow Signal Time |
-| red_time | INT | Red Signal Time |
+### Attributes
+
+- signal_id (Primary Key)
+- location
+- green_time
+- yellow_time
+- red_time
 
 ---
 
 ## 3. Vehicles
 
-Purpose:
-Store detected vehicle information.
+Stores detected vehicle information.
 
-| Column | Data Type | Description |
-|---------|-----------|-------------|
-| vehicle_id | INT | Primary Key |
-| vehicle_type | VARCHAR(50) | Car, Bike, Bus, Truck |
-| detected_time | DATETIME | Detection Time |
-| signal_id | INT | Related Traffic Signal |
+### Attributes
+
+- vehicle_id (Primary Key)
+- vehicle_type
+- detected_time
+- signal_id (Foreign Key)
 
 ---
 
 ## 4. Traffic Logs
 
-Purpose:
-Store daily traffic statistics.
+Stores traffic statistics.
 
-| Column | Data Type | Description |
-|---------|-----------|-------------|
-| log_id | INT | Primary Key |
-| signal_id | INT | Related Signal |
-| vehicle_count | INT | Number of Vehicles |
-| congestion_level | VARCHAR(20) | Low / Medium / High |
-| log_time | DATETIME | Record Time |
+### Attributes
+
+- log_id (Primary Key)
+- signal_id (Foreign Key)
+- vehicle_count
+- congestion_level
+- log_time
 
 ---
 
 # Relationships
 
 Users
-
-↓
+│
+├── Manage
+│
+▼
 
 Traffic Signals
-
-↓
+│
+├── Detect
+│
+▼
 
 Vehicles
-
-↓
+│
+├── Generate
+│
+▼
 
 Traffic Logs
 
 ---
 
-# Primary Keys
+# Keys
 
-- id
+## Primary Keys
+
+- user_id
 - signal_id
 - vehicle_id
 - log_id
 
 ---
 
-# Foreign Keys
+## Foreign Keys
 
-- Vehicles.signal_id → TrafficSignals.signal_id
-- TrafficLogs.signal_id → TrafficSignals.signal_id
+Vehicles.signal_id
+
+↓
+
+TrafficSignals.signal_id
+
+TrafficLogs.signal_id
+
+↓
+
+TrafficSignals.signal_id
+
+---
+
+# Relationship Type
+
+Users
+
+1
+
+↓
+
+N
+
+Traffic Signals
+
+Traffic Signals
+
+1
+
+↓
+
+N
+
+Vehicles
+
+Traffic Signals
+
+1
+
+↓
+
+N
+
+Traffic Logs
+
+---
+
+# ER Diagram
+
+See:
+
+images/er_diagram.png
 
 ---
 
@@ -118,15 +173,6 @@ Traffic Logs
 
 ---
 
-# Benefits
-
-- Easy to manage
-- Scalable
-- Supports analytics
-- Easy integration with AI modules
-
----
-
 ## Status
 
-✅ Database Design Completed
+✅ Database Design Updated
