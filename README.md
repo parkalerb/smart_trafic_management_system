@@ -191,7 +191,34 @@ Through this project I am gaining practical experience in:
 - UML Documentation
 - AI-based Traffic Management Concepts
 
+<<<<<<< HEAD
 ---
+=======
+## 🏗️ System Architecture
+![Architecture](docs/images/architecture.png)
+
+---
+
+## 🗄️ ER Diagram
+![ER Diagram](docs/images/er_diagram.png)
+
+---
+
+## 👤 Use Case Diagram
+![Use Case](docs/images/use_case_diagram.png)
+
+---
+
+## 📦 Class Diagram
+![Class Diagram](docs/images/class_diagram.png)
+
+---
+
+## 🔄 Sequence Diagram
+![Sequence Diagram](docs/images/sequence_diagram.png)
+
+## 👨‍💻 Author
+>>>>>>> 0ff7e68 (Day 019 - Configured MySQL and connected Flask backend)
 
 # 🚀 Future Enhancements
 
