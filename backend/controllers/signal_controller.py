@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import request, jsonify
 
 from services.signal_service import (
     get_all_signals,
@@ -11,46 +11,60 @@ from services.signal_service import (
 
 def get_signals():
     signals = get_all_signals()
-    return jsonify(signals)
+    return jsonify(signals), 200
 
 
 def get_signal(signal_id):
     signal = get_signal_by_id(signal_id)
-    return jsonify(signal)
+
+    if signal is None:
+        return jsonify({"message": "Traffic signal not found"}), 404
+
+    return jsonify(signal), 200
 
 
 def add_signal():
     data = request.get_json()
 
-    if not data:
-        return jsonify({
-            "message": "Request body is missing"
-        }), 400
+    required_fields = [
+        "location",
+        "green_time",
+        "yellow_time",
+        "red_time"
+    ]
 
-    result = create_signal(data)
-    return jsonify(result), 201
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"message": f"{field} is required"}), 400
+
+    signal = create_signal(data)
+
+    return jsonify({
+        "message": "Traffic signal created successfully",
+        "data": signal
+    }), 201
 
 
 def edit_signal(signal_id):
     data = request.get_json()
 
-    if not data:
-        return jsonify({
-            "message": "Request body is missing"
-        }), 400
+    signal = update_signal(signal_id, data)
 
-    result = update_signal(signal_id, data)
+    if signal is None:
+        return jsonify({"message": "Traffic signal not found"}), 404
 
-    if result.get("message") == "Signal not found":
-        return jsonify(result), 404
-
-    return jsonify(result)
+    return jsonify({
+        "message": "Traffic signal updated successfully",
+        "data": signal
+    }), 200
 
 
 def remove_signal(signal_id):
-    result = delete_signal(signal_id)
+    deleted = delete_signal(signal_id)
 
-    if result.get("message") == "Signal not found":
-        return jsonify(result), 404
+    if not deleted:
+        return jsonify({"message": "Traffic signal not found"}), 404
 
-    return jsonify(result)
+    return jsonify({
+        "message": "Traffic signal deleted successfully"
+    }), 200

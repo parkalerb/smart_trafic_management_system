@@ -9,29 +9,36 @@ from controllers.signal_controller import (
 
 def register_routes(app):
 
+    # Home Route
     @app.route("/")
     def home():
         return {
-            "project": "Smart Traffic Management System",
-            "status": "Backend Running"
+            "message": "Smart Traffic Management System API is Running..."
         }
 
+
+    # Traffic Signal Routes
+
     @app.route("/signals", methods=["GET"])
-    def all_signals():
+    def fetch_all_signals():
         return get_signals()
 
+
     @app.route("/signals/<int:signal_id>", methods=["GET"])
-    def single_signal(signal_id):
+    def fetch_signal(signal_id):
         return get_signal(signal_id)
 
+
     @app.route("/signals", methods=["POST"])
-    def create_signal_route():
+    def create_new_signal():
         return add_signal()
 
+
     @app.route("/signals/<int:signal_id>", methods=["PUT"])
-    def update_signal_route(signal_id):
+    def update_existing_signal(signal_id):
         return edit_signal(signal_id)
 
+
     @app.route("/signals/<int:signal_id>", methods=["DELETE"])
-    def delete_signal_route(signal_id):
+    def delete_existing_signal(signal_id):
         return remove_signal(signal_id)
