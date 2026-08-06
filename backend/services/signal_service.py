@@ -76,3 +76,25 @@ def delete_signal(signal_id):
     db.session.commit()
 
     return True
+
+def search_signals(location):
+
+    signals = TrafficSignal.query.filter(
+        TrafficSignal.location.ilike(f"%{location}%")
+    ).all()
+
+    return [
+        signal.to_dict()
+        for signal in signals
+    ]
+
+def filter_signals(status):
+
+    signals = TrafficSignal.query.filter_by(
+        status=status.upper()
+    ).all()
+
+    return [
+        signal.to_dict()
+        for signal in signals
+    ]

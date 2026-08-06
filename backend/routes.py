@@ -3,8 +3,10 @@ from controllers.signal_controller import (
     get_signal,
     add_signal,
     edit_signal,
-    remove_signal
-)
+    remove_signal,
+    search_signal,
+    filter_signal
+    )
 
 from controllers.user_controller import (
     register,
@@ -14,6 +16,7 @@ from controllers.user_controller import (
     edit_user,
     remove_user
 )
+from controllers.dashboard_controller import dashboard_stats
 
 
 def register_routes(app):
@@ -25,12 +28,19 @@ def register_routes(app):
             "message": "Smart Traffic Management System API is Running..."
         }
 
-
     # Traffic Signal Routes
 
     @app.route("/signals", methods=["GET"])
     def fetch_all_signals():
         return get_signals()
+
+    @app.route("/signals/search", methods=["GET"])
+    def search_signal_route():
+        return search_signal()
+    
+    @app.route("/signals/filter", methods=["GET"])
+    def filter_signal_route():
+        return filter_signal()
 
 
     @app.route("/signals/<int:signal_id>", methods=["GET"])
@@ -80,3 +90,7 @@ def register_routes(app):
     @app.route("/users/<int:user_id>", methods=["DELETE"])
     def delete_user_route(user_id):
         return remove_user(user_id)
+
+    @app.route("/dashboard/stats", methods=["GET"])
+    def get_dashboard_statistics():
+        return dashboard_stats()
