@@ -6,6 +6,15 @@ from controllers.signal_controller import (
     remove_signal
 )
 
+from controllers.user_controller import (
+    register,
+    login,
+    get_users,
+    get_user,
+    edit_user,
+    remove_user
+)
+
 
 def register_routes(app):
 
@@ -42,3 +51,32 @@ def register_routes(app):
     @app.route("/signals/<int:signal_id>", methods=["DELETE"])
     def delete_existing_signal(signal_id):
         return remove_signal(signal_id)
+
+    @app.route("/users/register", methods=["POST"])
+    def register_user_route():
+        return register()
+
+
+    @app.route("/users/login", methods=["POST"])
+    def login_user_route():
+        return login()
+
+
+    @app.route("/users", methods=["GET"])
+    def fetch_all_users():
+        return get_users()
+
+
+    @app.route("/users/<int:user_id>", methods=["GET"])
+    def fetch_user(user_id):
+        return get_user(user_id)
+
+
+    @app.route("/users/<int:user_id>", methods=["PUT"])
+    def update_user_route(user_id):
+        return edit_user(user_id)
+
+
+    @app.route("/users/<int:user_id>", methods=["DELETE"])
+    def delete_user_route(user_id):
+        return remove_user(user_id)
