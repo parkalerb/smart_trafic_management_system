@@ -6,8 +6,13 @@ import DashboardStats from "../components/dashboard/DashboardStats";
 import { getDashboardStats } from "../services/dashboardService";
 
 import SignalTable from "../components/signals/SignalTable";
-import { getSignals } from "../services/signalService";
+import SignalFilter from "../components/signals/SignalFilter";
 
+import {
+    getSignals,
+    searchSignals,
+    filterSignals
+} from "../services/signalService";
 function Dashboard() {
 
     const [stats, setStats] = useState({
@@ -18,6 +23,9 @@ function Dashboard() {
     });
 
     const [signals, setSignals] = useState([]);
+    const [search, setSearch] = useState("");
+
+    const [status, setStatus] = useState("");
 
     useEffect(() => {
         loadDashboard();
@@ -41,14 +49,72 @@ function Dashboard() {
             console.error(error);
         }
     }
+    async function handleSearch() {
 
-   return (
+    try {
+
+        if (search.trim() === "") {
+
+            loadSignals();
+
+            return;
+
+        }
+
+        const data = await searchSignals(search);
+
+        setSignals(data);
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
+}
+
+  async function handleFilter(selectedStatus) {
+
+    console.log("Selected Status:", selectedStatus);
+
+    if (selectedStatus === "") {
+        await loadSignals();
+        return;
+    }
+
+    try {
+
+        const data = await filterSignals(selectedStatus);
+
+        console.log("Response:", data);
+
+        setSignals(data);
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
+}
+  return (
     <Layout>
+
         <h2>Dashboard</h2>
 
         <DashboardStats stats={stats} />
 
+        <SignalFilter
+            search={search}
+            setSearch={setSearch}
+            status={status}
+            setStatus={setStatus}
+            onSearch={handleSearch}
+            onFilter={handleFilter}
+        />
+
         <SignalTable signals={signals} />
+
     </Layout>
 );
 }
