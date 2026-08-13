@@ -16,7 +16,10 @@ from controllers.user_controller import (
     edit_user,
     remove_user
 )
-from controllers.dashboard_controller import dashboard_stats
+from controllers.dashboard_controller import (
+    dashboard_stats,
+    dashboard_analytics
+)
 
 
 def register_routes(app):
@@ -94,3 +97,7 @@ def register_routes(app):
     @app.route("/dashboard/stats", methods=["GET"])
     def get_dashboard_statistics():
         return dashboard_stats()
+
+    @app.route("/dashboard/analytics", methods=["GET"])
+    def get_dashboard_analytics_route():
+        return dashboard_analytics()

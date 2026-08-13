@@ -2,8 +2,14 @@ import { useEffect, useState } from "react";
 
 import Layout from "../components/layout/Layout";
 import DashboardStats from "../components/dashboard/DashboardStats";
+import AnalyticsCards from "../components/dashboard/AnalyticsCards";
+import SignalStatusChart from "../components/dashboard/SignalStatusChart";
+import SignalTimingChart from "../components/dashboard/SignalTimingChart";
 
-import { getDashboardStats } from "../services/dashboardService";
+import {
+    getDashboardStats,
+    getDashboardAnalytics
+} from "../services/dashboardService";
 
 import SignalTable from "../components/signals/SignalTable";
 import SignalFilter from "../components/signals/SignalFilter";
@@ -27,6 +33,15 @@ function Dashboard() {
         total_users: 0
     });
 
+    const [analytics, setAnalytics] = useState({
+        total_green_time: 0,
+        average_green_time: 0,
+        maximum_green_time: 0,
+        minimum_green_time: 0,
+        active_percentage: 0,
+        inactive_percentage: 0
+    });
+
     const [signals, setSignals] = useState([]);
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState("");
@@ -39,6 +54,7 @@ function Dashboard() {
     const [deletingSignal, setDeletingSignal] = useState(null);
 
     const [actionLoading, setActionLoading] = useState(false);
+    const [loadingDashboard, setLoadingDashboard] = useState(false);
     const [apiError, setApiError] = useState(null);
     const [toastMessage, setToastMessage] = useState(null);
 
@@ -55,11 +71,18 @@ function Dashboard() {
     };
 
     async function loadDashboard() {
+        setLoadingDashboard(true);
         try {
-            const data = await getDashboardStats();
-            setStats(data);
+            const [statsData, analyticsData] = await Promise.all([
+                getDashboardStats(),
+                getDashboardAnalytics()
+            ]);
+            setStats(statsData);
+            setAnalytics(analyticsData);
         } catch (error) {
-            console.error("Failed to load dashboard stats:", error);
+            console.error("Failed to load dashboard metrics:", error);
+        } finally {
+            setLoadingDashboard(false);
         }
     }
 
@@ -176,7 +199,7 @@ function Dashboard() {
         <Layout>
             {/* Header with Dashboard title & Add Signal button */}
             <div style={styles.headerRow}>
-                <h2>Dashboard</h2>
+                <h2>Dashboard & Traffic Analytics</h2>
                 <button onClick={handleOpenAddModal} style={styles.addBtn}>
                     ➕ Add Traffic Signal
                 </button>
@@ -189,8 +212,22 @@ function Dashboard() {
                 </div>
             )}
 
+            {/* Overview KPI Cards */}
             <DashboardStats stats={stats} />
 
+            {/* Analytical Metrics Cards */}
+            <AnalyticsCards analytics={analytics} />
+
+            {/* Visual Analytics Charts Section */}
+            <div style={styles.chartsSection}>
+                <h3 style={styles.sectionTitle}>📊 Traffic Analytics & Visualizations</h3>
+                <div style={styles.chartsRow}>
+                    <SignalStatusChart stats={stats} />
+                    <SignalTimingChart signals={signals} />
+                </div>
+            </div>
+
+            {/* Signals Table Section */}
             <SignalFilter
                 search={search}
                 setSearch={setSearch}
@@ -255,6 +292,20 @@ const styles = {
         borderRadius: "8px",
         marginTop: "16px",
         fontWeight: "600"
+    },
+    chartsSection: {
+        marginTop: "30px"
+    },
+    sectionTitle: {
+        margin: "0 0 16px 0",
+        color: "#263238",
+        fontSize: "18px",
+        fontWeight: "bold"
+    },
+    chartsRow: {
+        display: "flex",
+        gap: "20px",
+        flexWrap: "wrap"
     }
 };
 
