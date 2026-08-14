@@ -21,6 +21,11 @@ from controllers.dashboard_controller import (
     dashboard_analytics
 )
 
+from controllers.detection_controller import (
+    trigger_detection,
+    fetch_detection_status
+)
+
 
 def register_routes(app):
 
@@ -100,4 +105,13 @@ def register_routes(app):
 
     @app.route("/dashboard/analytics", methods=["GET"])
     def get_dashboard_analytics_route():
-        return dashboard_analytics()
+        return dashboard_analytics()
+
+    @app.route("/detection/process", methods=["POST"])
+    def process_detection_route():
+        return trigger_detection()
+
+    @app.route("/detection/status/<int:signal_id>", methods=["GET"])
+    def get_detection_status_route(signal_id):
+        return fetch_detection_status(signal_id)
+
