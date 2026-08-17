@@ -199,7 +199,13 @@ function Dashboard() {
         <Layout>
             {/* Header with Dashboard title & Add Signal button */}
             <div style={styles.headerRow}>
-                <h2>Dashboard & Traffic Analytics</h2>
+                <div>
+                    <h2 style={{ margin: "0 0 4px 0", color: "#1e293b" }}>Dashboard & Traffic Analytics</h2>
+                    <p style={{ margin: 0, color: "#64748b", fontSize: "14px" }}>
+                        Real-time intersection monitoring, analytical metrics, and signal control
+                    </p>
+                </div>
+
                 <button onClick={handleOpenAddModal} style={styles.addBtn}>
                     ➕ Add Traffic Signal
                 </button>
@@ -271,7 +277,9 @@ const styles = {
     headerRow: {
         display: "flex",
         justifyContent: "space-between",
-        alignItems: "center"
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: "16px"
     },
     addBtn: {
         background: "#2e7d32",
@@ -282,7 +290,8 @@ const styles = {
         fontSize: "14px",
         fontWeight: "bold",
         cursor: "pointer",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.15)"
+        boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+        transition: "background 0.2s ease"
     },
     toast: {
         background: "#e8f5e9",
@@ -298,7 +307,7 @@ const styles = {
     },
     sectionTitle: {
         margin: "0 0 16px 0",
-        color: "#263238",
+        color: "#1e293b",
         fontSize: "18px",
         fontWeight: "bold"
     },

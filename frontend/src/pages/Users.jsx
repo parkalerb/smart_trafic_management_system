@@ -117,7 +117,7 @@ function Users() {
     return (
         <Layout>
             <div style={styles.headerRow}>
-                <h2>User Management</h2>
+                <h2 style={{ margin: 0, color: "#1e293b" }}>User Management Directory</h2>
             </div>
 
             {/* Success Toast Notification */}
@@ -155,76 +155,76 @@ function Users() {
 
             {/* User Table */}
             <div style={styles.tableCard}>
-                <h3>System Users</h3>
+                <h3 style={{ margin: "0 0 16px 0", color: "#1e293b", fontSize: "18px", fontWeight: "bold" }}>
+                    👤 System Users Directory
+                </h3>
 
                 {loadingUsers ? (
-                    <p style={{ textAlign: "center", padding: "20px" }}>Loading users...</p>
+                    <p style={{ textAlign: "center", padding: "30px", color: "#64748b" }}>Loading users directory...</p>
                 ) : (
-                    <table style={styles.table}>
-                        <thead>
-                            <tr style={{ background: "#1976d2", color: "white" }}>
-                                <th style={styles.th}>ID</th>
-                                <th style={styles.th}>Full Name</th>
-                                <th style={styles.th}>Email</th>
-                                <th style={styles.th}>Role</th>
-                                <th style={styles.th}>Status</th>
-                                <th style={styles.thCenter}>Actions</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {filteredUsers.length === 0 ? (
-                                <tr>
-                                    <td colSpan="6" style={styles.emptyTd}>
-                                        No matching users found.
-                                    </td>
+                    <div style={{ overflowX: "auto" }}>
+                        <table style={styles.table}>
+                            <thead>
+                                <tr style={{ background: "#1565c0", color: "#ffffff" }}>
+                                    <th style={styles.th}>ID</th>
+                                    <th style={styles.th}>Full Name</th>
+                                    <th style={styles.th}>Email</th>
+                                    <th style={styles.th}>Role</th>
+                                    <th style={styles.th}>Status</th>
+                                    <th style={styles.thCenter}>Actions</th>
                                 </tr>
-                            ) : (
-                                filteredUsers.map((u) => (
-                                    <tr key={u.id}>
-                                        <td style={styles.td}>{u.id}</td>
-                                        <td style={{ ...styles.td, fontWeight: "600" }}>
-                                            {u.full_name}
-                                        </td>
-                                        <td style={styles.td}>{u.email}</td>
-                                        <td style={styles.td}>
-                                            <span style={styles.roleBadge}>{u.role}</span>
-                                        </td>
-                                        <td style={styles.td}>
-                                            <span
-                                                style={{
-                                                    ...styles.statusBadge,
-                                                    background: u.is_active
-                                                        ? "#e8f5e9"
-                                                        : "#ffebee",
-                                                    color: u.is_active
-                                                        ? "#2e7d32"
-                                                        : "#c62828"
-                                                }}
-                                            >
-                                                {u.is_active ? "ACTIVE" : "INACTIVE"}
-                                            </span>
-                                        </td>
-                                        <td style={styles.tdCenter}>
-                                            <button
-                                                onClick={() => handleOpenEditModal(u)}
-                                                style={styles.editBtn}
-                                            >
-                                                ✏️ Edit
-                                            </button>
+                            </thead>
 
-                                            <button
-                                                onClick={() => handleOpenDeleteModal(u)}
-                                                style={styles.deleteBtn}
-                                            >
-                                                🗑️ Delete
-                                            </button>
+                            <tbody>
+                                {filteredUsers.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="6" style={styles.emptyTd}>
+                                            No matching user accounts found.
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                ) : (
+                                    filteredUsers.map((u) => (
+                                        <tr key={u.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                                            <td style={styles.td}>#{u.id}</td>
+                                            <td style={{ ...styles.td, fontWeight: "600", color: "#1e293b" }}>
+                                                {u.full_name}
+                                            </td>
+                                            <td style={styles.td}>{u.email}</td>
+                                            <td style={styles.td}>
+                                                <span style={styles.roleBadge}>{u.role}</span>
+                                            </td>
+                                            <td style={styles.td}>
+                                                <span
+                                                    style={{
+                                                        ...styles.statusBadge,
+                                                        background: u.is_active ? "#e8f5e9" : "#ffebee",
+                                                        color: u.is_active ? "#2e7d32" : "#c62828"
+                                                    }}
+                                                >
+                                                    {u.is_active ? "🟢 ACTIVE" : "🔴 INACTIVE"}
+                                                </span>
+                                            </td>
+                                            <td style={styles.tdCenter}>
+                                                <button
+                                                    onClick={() => handleOpenEditModal(u)}
+                                                    style={styles.editBtn}
+                                                >
+                                                    ✏️ Edit
+                                                </button>
+
+                                                <button
+                                                    onClick={() => handleOpenDeleteModal(u)}
+                                                    style={styles.deleteBtn}
+                                                >
+                                                    🗑️ Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
             </div>
 
@@ -269,7 +269,7 @@ const styles = {
     },
     statsContainer: {
         display: "flex",
-        gap: "20px",
+        gap: "16px",
         flexWrap: "wrap",
         marginTop: "20px"
     },
@@ -277,90 +277,100 @@ const styles = {
         display: "flex",
         gap: "16px",
         marginTop: "24px",
-        marginBottom: "20px"
+        marginBottom: "20px",
+        flexWrap: "wrap"
     },
     searchInput: {
         padding: "10px 14px",
         borderRadius: "6px",
-        border: "1px solid #ccc",
+        border: "1px solid #cbd5e1",
         fontSize: "14px",
-        minWidth: "260px"
+        flex: "1 1 260px",
+        outline: "none"
     },
     roleSelect: {
         padding: "10px 14px",
         borderRadius: "6px",
-        border: "1px solid #ccc",
+        border: "1px solid #cbd5e1",
         fontSize: "14px",
-        background: "#fff"
+        background: "#ffffff",
+        outline: "none"
     },
     tableCard: {
         marginTop: "20px",
         background: "#ffffff",
         padding: "20px",
         borderRadius: "10px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        border: "1px solid #edf2f7"
     },
     table: {
         width: "100%",
         borderCollapse: "collapse",
-        marginTop: "16px"
+        minWidth: "600px"
     },
     th: {
-        padding: "12px",
-        textAlign: "left"
+        padding: "12px 14px",
+        textAlign: "left",
+        fontSize: "13px"
     },
     thCenter: {
-        padding: "12px",
-        textAlign: "center"
+        padding: "12px 14px",
+        textAlign: "center",
+        fontSize: "13px"
     },
     td: {
-        padding: "12px",
-        borderBottom: "1px solid #ddd"
+        padding: "12px 14px",
+        fontSize: "14px",
+        color: "#334155"
     },
     tdCenter: {
-        padding: "12px",
-        borderBottom: "1px solid #ddd",
+        padding: "12px 14px",
         textAlign: "center"
     },
     emptyTd: {
-        padding: "20px",
+        padding: "30px",
         textAlign: "center",
-        color: "#888"
+        color: "#64748b",
+        fontSize: "14px"
     },
     roleBadge: {
-        padding: "4px 8px",
+        padding: "3px 8px",
         borderRadius: "4px",
-        background: "#e3f2fd",
-        color: "#1565c0",
+        background: "#e0f2fe",
+        color: "#0369a1",
         fontWeight: "bold",
-        fontSize: "12px"
+        fontSize: "11px"
     },
     statusBadge: {
         padding: "4px 10px",
         borderRadius: "12px",
         fontSize: "12px",
-        fontWeight: "bold"
+        fontWeight: "bold",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "4px"
     },
     editBtn: {
         padding: "6px 12px",
         marginRight: "8px",
-        background: "#ffa726",
-        color: "#fff",
+        background: "#f57c00",
+        color: "#ffffff",
         border: "none",
-        borderRadius: "4px",
+        borderRadius: "6px",
         cursor: "pointer",
         fontWeight: "bold",
-        fontSize: "13px"
+        fontSize: "12px"
     },
     deleteBtn: {
         padding: "6px 12px",
-        background: "#ef5350",
-        color: "#fff",
+        background: "#c62828",
+        color: "#ffffff",
         border: "none",
-        borderRadius: "4px",
+        borderRadius: "6px",
         cursor: "pointer",
         fontWeight: "bold",
-        fontSize: "13px"
+        fontSize: "12px"
     }
 };
 
