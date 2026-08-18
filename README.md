@@ -1,247 +1,135 @@
 # 🚦 Smart Traffic Management System
 
-An AI-powered Smart Traffic Management System that optimizes traffic signal timings based on real-time vehicle density using Computer Vision and Machine Learning.
+An AI-powered Smart Traffic Management System that optimizes traffic signal timings based on real-time vehicle density using Computer Vision (OpenCV) and dynamic signal algorithms.
 
-This project is being developed as a portfolio project following industry-standard Software Development Life Cycle (SDLC) practices. It demonstrates full-stack development, backend API design, database modeling, and AI-based traffic analysis.
-
----
-
-## 🎯 Project Objectives
-
-- Reduce traffic congestion
-- Optimize traffic signal timings dynamically
-- Detect vehicle density using Computer Vision
-- Improve traffic flow efficiency
-- Build a scalable Smart City solution
-- Gain hands-on experience with SDLC and full-stack development
+This project follows industry-standard Software Development Life Cycle (SDLC) practices, demonstrating full-stack React frontend design, Flask RESTful API architecture, MySQL database modeling, and OpenCV computer vision processing.
 
 ---
 
-## ✨ Key Features
+## 🎯 Key Features
 
-### ✅ Completed
-
-- Project Planning
-- Requirements Analysis
-- Research Documentation
-- Development Roadmap
-- Database Design
-- System Architecture
-- ER Diagram
-- Use Case Diagram
-- Class Diagram
-- Sequence Diagram
-- Flask Backend Initialization
-- Initial Database Model
-- Basic REST API Structure
-
-### 🚧 In Progress
-
-- MySQL Integration
-- CRUD APIs
-- Frontend Dashboard
-- Vehicle Detection Module
-
-### 🔜 Upcoming
-
-- YOLO-based Vehicle Detection
-- Dynamic Signal Timing
-- Traffic Analytics Dashboard
-- Historical Reports
-- Emergency Vehicle Priority
-- User Authentication
-- Real-time CCTV Integration
+- **📊 Live Traffic Dashboard**: Real-time KPI statistics cards, signal counts, user counts, and complete traffic signal management table.
+- **📈 Traffic Analytics & Data Visualizations**: Interactive `Chart.js` Doughnut charts (Active vs Inactive signals) and grouped Bar charts (Green, Yellow, and Red cycle timing per location).
+- **🎥 Live OpenCV Vehicle Detection**: Real-time image/frame contour processing, vehicle counting, congestion level classification (`LOW`, `MEDIUM`, `HIGH`), and dynamic green signal timing calculation (`20s + vehicle_count * 3s`).
+- **👤 User Management & Authentication**: Tabbed login/registration portal, password security via bcrypt, React Context session persistence, protected client-side routes, and admin user account management (`ADMIN`, `OPERATOR`, `USER`).
+- **🔍 Signal Filtering & Search**: Instant location search and status filtering (`ACTIVE` / `INACTIVE`).
 
 ---
 
-# 🛠️ Tech Stack
+## 🛠️ Technology Stack
 
-## Frontend
-
-- HTML
-- CSS
-- JavaScript
-- Bootstrap
-
-## Backend
-
-- Python
-- Flask
-- Flask-SQLAlchemy
-- Flask-CORS
-
-## Database
-
-- MySQL
-
-## AI / Computer Vision
-
-- OpenCV
-- YOLO (Upcoming)
-
-## Development Tools
-
-- Git
-- GitHub
-- VS Code
-- Postman
+- **Frontend**: React, Vite, React Router, Chart.js, React-Chartjs-2, Axios.
+- **Backend**: Python 3.10+, Flask, Flask-SQLAlchemy, Flask-CORS, PyMySQL, python-dotenv.
+- **Computer Vision**: OpenCV (`opencv-python`), NumPy.
+- **Database**: MySQL Server 8.0+.
 
 ---
 
-# 📂 Project Structure
+## 📂 Project Architecture & Directory Structure
 
 ```text
 smart_trafic_management_system/
-
-│
 ├── backend/
-│   ├── app.py
-│   ├── config.py
-│   ├── routes.py
-│   ├── models.py
-│   ├── database/
-│   └── utils/
+│   ├── app.py                 # Flask application entry point
+│   ├── config.py              # Environment configuration loader
+│   ├── routes.py              # API route registry
+│   ├── controllers/           # HTTP request handlers
+│   ├── services/              # Business logic & OpenCV engine
+│   ├── models/                # SQLAlchemy database models
+│   ├── database/              # DB connection initialization
+│   └── .env.example           # Backend environment template
 │
 ├── frontend/
+│   ├── src/
+│   │   ├── components/        # UI components (dashboard, signals, users, layout)
+│   │   ├── context/           # React AuthContext
+│   │   ├── pages/             # Dashboard, Detection, Users, Login pages
+│   │   └── services/          # Axios API service layer (api.js, signalService.js, etc.)
+│   ├── index.html
+│   ├── vite.config.js
+│   └── .env.example           # Frontend environment template
 │
 ├── docs/
-│   ├── requirements.md
-│   ├── research.md
-│   ├── database_design.md
-│   └── images/
-│       ├── architecture.png
-│       ├── er_diagram.png
-│       ├── use_case_diagram.png
-│       ├── class_diagram.png
-│       └── sequence_diagram.png
-│
-├── README.md
-└── requirements.txt
+│   ├── deployment_guide.md    # Production deployment documentation
+│   ├── database_design.md    # Database ER diagrams and schema specifications
+│   └── system_architecture.mcd
+├── .gitignore                 # Root Git exclusion rules
+└── README.md                  # Project documentation
 ```
 
 ---
 
-# 📊 Development Progress
+## ⚡ Quick Start & Development Setup
 
-| Sprint | Status |
-|---------|--------|
-| Sprint 1 | ✅ Completed |
-| Sprint 2 | ✅ Completed |
-| Sprint 3 | 🔜 Coming Soon |
+### 1. Backend Setup
 
----
+1. **Navigate to backend directory**:
+   ```bash
+   cd backend
+   ```
 
-# 🗺️ Development Roadmap
+2. **Create virtual environment & install dependencies**:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
 
-| Phase | Status |
-|--------|--------|
-| Project Planning | ✅ Completed |
-| Requirements Analysis | ✅ Completed |
-| Research | ✅ Completed |
-| Database Design | ✅ Completed |
-| Software Design (UML) | ✅ Completed |
-| Backend Development | 🚧 In Progress |
-| Frontend Development | 🔜 Upcoming |
-| AI Integration | 🔜 Upcoming |
-| Testing | 🔜 Upcoming |
-| Deployment | 🔜 Upcoming |
+3. **Configure Environment Variables**:
+   Create a `.env` file based on `.env.example`:
+   ```bash
+   cp .env.example .env
+   ```
+   *Configure your local MySQL connection in `DATABASE_URL`.*
 
----
-
-# 📚 Project Documentation
-
-The repository includes detailed project documentation:
-
-- ✅ Problem Statement
-- ✅ Requirements Analysis
-- ✅ Research
-- ✅ Database Design
-- ✅ Software Architecture
-- ✅ ER Diagram
-- ✅ Use Case Diagram
-- ✅ Class Diagram
-- ✅ Sequence Diagram
-- 🚧 API Documentation (Upcoming)
+4. **Run Development Server**:
+   ```bash
+   python app.py
+   ```
+   *Backend starts at `http://127.0.0.1:5000`.*
 
 ---
 
-# 📷 System Design
+### 2. Frontend Setup
 
-The project documentation includes professional UML diagrams:
+1. **Navigate to frontend directory**:
+   ```bash
+   cd frontend
+   ```
 
-- 🏗️ System Architecture Diagram
-- 🗄️ Entity Relationship (ER) Diagram
-- 👤 Use Case Diagram
-- 📦 Class Diagram
-- 🔄 Sequence Diagram
+2. **Install Node.js dependencies**:
+   ```bash
+   npm install
+   ```
 
----
+3. **Configure Environment Variables (Optional)**:
+   Create a `.env` file based on `.env.example`:
+   ```bash
+   VITE_API_BASE_URL=http://127.0.0.1:5000
+   ```
 
-# 💡 Learning Outcomes
-
-Through this project I am gaining practical experience in:
-
-- Software Development Life Cycle (SDLC)
-- Backend Development using Flask
-- REST API Design
-- Database Modeling
-- MySQL Integration
-- Git & GitHub Workflow
-- Software Architecture Design
-- UML Documentation
-- AI-based Traffic Management Concepts
-
-<<<<<<< HEAD
----
-=======
-## 🏗️ System Architecture
-![Architecture](docs/images/architecture.png)
+4. **Run Development Server**:
+   ```bash
+   npm run dev
+   ```
+   *Frontend starts at `http://localhost:5173`.*
 
 ---
 
-## 🗄️ ER Diagram
-![ER Diagram](docs/images/er_diagram.png)
+## 📦 Production Build Instructions
+
+To generate optimized static assets for production deployment:
+
+```bash
+cd frontend
+npm run build
+```
+
+The production assets will be generated in `frontend/dist/`. Refer to [docs/deployment_guide.md](docs/deployment_guide.md) for production server setup.
 
 ---
-
-## 👤 Use Case Diagram
-![Use Case](docs/images/use_case_diagram.png)
-
----
-
-## 📦 Class Diagram
-![Class Diagram](docs/images/class_diagram.png)
-
----
-
-## 🔄 Sequence Diagram
-![Sequence Diagram](docs/images/sequence_diagram.png)
 
 ## 👨‍💻 Author
->>>>>>> 0ff7e68 (Day 019 - Configured MySQL and connected Flask backend)
-
-# 🚀 Future Enhancements
-
-- Real-time Vehicle Detection using YOLO
-- Smart Traffic Signal Optimization
-- Emergency Vehicle Priority
-- Accident Detection
-- IoT-based Smart Traffic Signals
-- Cloud Deployment
-- Mobile Application
-- AI-based Traffic Prediction
-- Smart City Integration
-
----
-
-# 👨‍💻 Author
 
 **Rohan Parkale**
-
-- MCA Student
-- Aspiring Software Developer
-- Passionate about Python, Machine Learning, and Full-Stack Development
-
----
-
-⭐ **This repository showcases my end-to-end software development journey, from project planning and system design to backend development and AI integration.**
+- MCA Student & Full-Stack / ML Developer

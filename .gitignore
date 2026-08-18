@@ -1,0 +1,33 @@
+# Environment & Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+*.venv
+
+# Node.js Dependencies & Production Builds
+node_modules/
+dist/
+build/
+.vite/
+
+# IDE & OS Artifacts
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Scratch & Temporary Logs
+scratch/
+*.log
