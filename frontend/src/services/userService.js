@@ -10,6 +10,16 @@ export const registerUser = async (userData) => {
     return response.data;
 };
 
+export const logoutUser = async () => {
+    const response = await api.post("/users/logout");
+    return response.data;
+};
+
+export const getCurrentUser = async () => {
+    const response = await api.get("/users/me");
+    return response.data;
+};
+
 export const getUsers = async () => {
     const response = await api.get("/users");
     return response.data;

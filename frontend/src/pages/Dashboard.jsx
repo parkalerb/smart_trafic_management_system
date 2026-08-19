@@ -25,13 +25,20 @@ import {
     deleteSignal
 } from "../services/signalService";
 
+import { useAuth } from "../context/AuthContext";
+
 function Dashboard() {
+    const { user } = useAuth();
+    const userRole = user?.role || "USER";
+    const canAddSignal = userRole === "ADMIN" || userRole === "OPERATOR";
+
     const [stats, setStats] = useState({
         total_signals: 0,
         active_signals: 0,
         inactive_signals: 0,
         total_users: 0
     });
+
 
     const [analytics, setAnalytics] = useState({
         total_green_time: 0,
@@ -206,10 +213,13 @@ function Dashboard() {
                     </p>
                 </div>
 
-                <button onClick={handleOpenAddModal} style={styles.addBtn}>
-                    ➕ Add Traffic Signal
-                </button>
+                {canAddSignal && (
+                    <button onClick={handleOpenAddModal} style={styles.addBtn}>
+                        ➕ Add Traffic Signal
+                    </button>
+                )}
             </div>
+
 
             {/* Success Toast Banner */}
             {toastMessage && (

@@ -4,7 +4,13 @@ import DashboardCard from "../components/dashboard/DashboardCard";
 import { getSignals } from "../services/signalService";
 import { processDetection, getDetectionStatus } from "../services/detectionService";
 
+import { useAuth } from "../context/AuthContext";
+
 function Detection() {
+    const { user } = useAuth();
+    const userRole = user?.role || "USER";
+    const canRunDetection = userRole === "ADMIN" || userRole === "OPERATOR";
+
     const [signals, setSignals] = useState([]);
     const [selectedSignalId, setSelectedSignalId] = useState("");
     const [detectionData, setDetectionData] = useState(null);
@@ -13,6 +19,7 @@ function Detection() {
     const [processingDetection, setProcessingDetection] = useState(false);
     const [apiError, setApiError] = useState(null);
     const [toastMessage, setToastMessage] = useState(null);
+
 
     useEffect(() => {
         loadSignalsList();
@@ -124,14 +131,30 @@ function Detection() {
                     </p>
                 </div>
 
-                <button
-                    onClick={handleRunDetection}
-                    style={styles.runBtn}
-                    disabled={processingDetection || !selectedSignalId}
-                >
-                    {processingDetection ? "Processing OpenCV Frame..." : "⚡ Run OpenCV Detection"}
-                </button>
+                {canRunDetection ? (
+                    <button
+                        onClick={handleRunDetection}
+                        style={styles.runBtn}
+                        disabled={processingDetection || !selectedSignalId}
+                    >
+                        {processingDetection ? "Processing OpenCV Frame..." : "⚡ Run OpenCV Detection"}
+                    </button>
+                ) : (
+                    <span
+                        style={{
+                            background: "#e2e8f0",
+                            color: "#475569",
+                            padding: "8px 16px",
+                            borderRadius: "6px",
+                            fontWeight: "bold",
+                            fontSize: "13px"
+                        }}
+                    >
+                        👁️ View Only Mode
+                    </span>
+                )}
             </div>
+
 
             {/* Notification Messages */}
             {toastMessage && <div style={styles.toast}>✅ {toastMessage}</div>}

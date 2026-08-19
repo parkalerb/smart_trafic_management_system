@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
+import { logoutUser } from "../services/userService";
 
 const AuthContext = createContext(null);
 
@@ -18,9 +19,15 @@ export function AuthProvider({ children }) {
         localStorage.setItem("authUser", JSON.stringify(userData));
     };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem("authUser");
+    const logout = async () => {
+        try {
+            await logoutUser();
+        } catch (e) {
+            console.error("Logout API call failed:", e);
+        } finally {
+            setUser(null);
+            localStorage.removeItem("authUser");
+        }
     };
 
     return (

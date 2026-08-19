@@ -14,21 +14,23 @@ app.config.from_object(Config)
 is_production = os.getenv("FLASK_ENV") == "production"
 cors_origins_env = os.getenv("CORS_ORIGINS")
 
+allowed_headers = ["Content-Type", "Authorization"]
+
 # CORS configuration logic:
-# In production mode, require explicitly set CORS_ORIGINS to prevent wildcard exposure
+# Supports credentials (cookies/sessions) and restricts origins in production
 if is_production:
     if not cors_origins_env:
         raise ValueError(
             "CRITICAL CONFIGURATION ERROR: CORS_ORIGINS environment variable must be set in production mode."
         )
     origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
-    CORS(app, origins=origins)
+    CORS(app, origins=origins, allow_headers=allowed_headers, supports_credentials=True)
 else:
     if cors_origins_env:
         origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
-        CORS(app, origins=origins)
+        CORS(app, origins=origins, allow_headers=allowed_headers, supports_credentials=True)
     else:
-        CORS(app)
+        CORS(app, supports_credentials=True)
 
 db.init_app(app)
 

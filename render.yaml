@@ -1,0 +1,36 @@
+services:
+  # Render Free Web Service for Flask Backend API
+  - type: web
+    name: smart-traffic-backend
+    env: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false # Set to deployed frontend URL e.g. https://smart-traffic-frontend.onrender.com
+      - key: DATABASE_URL
+        sync: false # Set to Aiven Free MySQL URI e.g. mysql+pymysql://user:pass@host:port/dbname
+
+  # Render Free Static Site for React Frontend
+  - type: static
+    name: smart-traffic-frontend
+    region: oregon
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false # Set to deployed backend URL e.g. https://smart-traffic-backend.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

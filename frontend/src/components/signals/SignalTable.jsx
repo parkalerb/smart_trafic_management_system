@@ -1,4 +1,13 @@
+import { useAuth } from "../../context/AuthContext";
+
 function SignalTable({ signals, onEdit, onDelete }) {
+    const { user } = useAuth();
+    const userRole = user?.role || "USER";
+
+    const canEdit = userRole === "ADMIN" || userRole === "OPERATOR";
+    const canDelete = userRole === "ADMIN";
+    const hasActions = canEdit || canDelete;
+
     return (
         <div
             style={{
@@ -30,7 +39,9 @@ function SignalTable({ signals, onEdit, onDelete }) {
                             <th style={{ padding: "12px 14px", textAlign: "center", fontSize: "13px" }}>Green (s)</th>
                             <th style={{ padding: "12px 14px", textAlign: "center", fontSize: "13px" }}>Yellow (s)</th>
                             <th style={{ padding: "12px 14px", textAlign: "center", fontSize: "13px" }}>Red (s)</th>
-                            <th style={{ padding: "12px 14px", textAlign: "center", fontSize: "13px" }}>Actions</th>
+                            {hasActions && (
+                                <th style={{ padding: "12px 14px", textAlign: "center", fontSize: "13px" }}>Actions</th>
+                            )}
                         </tr>
                     </thead>
 
@@ -38,7 +49,7 @@ function SignalTable({ signals, onEdit, onDelete }) {
                         {signals.length === 0 ? (
                             <tr>
                                 <td
-                                    colSpan="7"
+                                    colSpan={hasActions ? "7" : "6"}
                                     style={{
                                         padding: "30px 20px",
                                         textAlign: "center",
@@ -90,40 +101,46 @@ function SignalTable({ signals, onEdit, onDelete }) {
                                         {signal.red_time}s
                                     </td>
 
-                                    <td style={{ padding: "12px 14px", textAlign: "center" }}>
-                                        <button
-                                            onClick={() => onEdit(signal)}
-                                            style={{
-                                                padding: "6px 12px",
-                                                marginRight: "8px",
-                                                background: "#f57c00",
-                                                color: "#ffffff",
-                                                border: "none",
-                                                borderRadius: "6px",
-                                                cursor: "pointer",
-                                                fontWeight: "bold",
-                                                fontSize: "12px"
-                                            }}
-                                        >
-                                            ✏️ Edit
-                                        </button>
+                                    {hasActions && (
+                                        <td style={{ padding: "12px 14px", textAlign: "center" }}>
+                                            {canEdit && (
+                                                <button
+                                                    onClick={() => onEdit(signal)}
+                                                    style={{
+                                                        padding: "6px 12px",
+                                                        marginRight: "8px",
+                                                        background: "#f57c00",
+                                                        color: "#ffffff",
+                                                        border: "none",
+                                                        borderRadius: "6px",
+                                                        cursor: "pointer",
+                                                        fontWeight: "bold",
+                                                        fontSize: "12px"
+                                                    }}
+                                                >
+                                                    ✏️ Edit
+                                                </button>
+                                            )}
 
-                                        <button
-                                            onClick={() => onDelete(signal)}
-                                            style={{
-                                                padding: "6px 12px",
-                                                background: "#c62828",
-                                                color: "#ffffff",
-                                                border: "none",
-                                                borderRadius: "6px",
-                                                cursor: "pointer",
-                                                fontWeight: "bold",
-                                                fontSize: "12px"
-                                            }}
-                                        >
-                                            🗑️ Delete
-                                        </button>
-                                    </td>
+                                            {canDelete && (
+                                                <button
+                                                    onClick={() => onDelete(signal)}
+                                                    style={{
+                                                        padding: "6px 12px",
+                                                        background: "#c62828",
+                                                        color: "#ffffff",
+                                                        border: "none",
+                                                        borderRadius: "6px",
+                                                        cursor: "pointer",
+                                                        fontWeight: "bold",
+                                                        fontSize: "12px"
+                                                    }}
+                                                >
+                                                    🗑️ Delete
+                                                </button>
+                                            )}
+                                        </td>
+                                    )}
                                 </tr>
                             ))
                         )}

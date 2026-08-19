@@ -18,6 +18,13 @@ class Config:
     # Use environment secret_key if present, fallback to local dev key in development mode only
     SECRET_KEY = secret_key or "dev_local_secret_key_traffic_system"
 
+    # Environment-aware Session Cookie Security Configuration:
+    # Development (FLASK_ENV != production): HTTP-only, SameSite=Lax, Secure=False (enables local http://localhost cookies)
+    # Production (FLASK_ENV == production): HTTP-only, SameSite=None, Secure=True (enables cross-site HTTPS cookies)
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "None" if is_production else "Lax"
+    SESSION_COOKIE_SECURE = True if is_production else False
+
     # Primary environment DB URI, with fallback to local development database
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DATABASE_URL",

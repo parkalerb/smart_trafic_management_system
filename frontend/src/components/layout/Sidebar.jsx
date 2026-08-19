@@ -1,6 +1,10 @@
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 function Sidebar({ isOpen, onClose }) {
+    const { user } = useAuth();
+    const isAdmin = user?.role === "ADMIN";
+
     const linkStyle = ({ isActive }) => ({
         display: "block",
         padding: "10px 14px",
@@ -59,9 +63,11 @@ function Sidebar({ isOpen, onClose }) {
                 🎥 Detection
             </NavLink>
 
-            <NavLink to="/users" style={linkStyle} onClick={onClose}>
-                👤 Users
-            </NavLink>
+            {isAdmin && (
+                <NavLink to="/users" style={linkStyle} onClick={onClose}>
+                    👤 Users
+                </NavLink>
+            )}
         </aside>
     );
 }
