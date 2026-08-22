@@ -20,9 +20,9 @@ function Login() {
     const [registerData, setRegisterData] = useState({
         full_name: "",
         email: "",
-        password: "",
-        role: "ADMIN"
+        password: ""
     });
+
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -288,24 +288,10 @@ function Login() {
                             )}
                         </div>
 
-                        <div style={styles.fieldGroup}>
-                            <label style={styles.label}>System Role</label>
-                            <select
-                                name="role"
-                                value={registerData.role}
-                                onChange={handleRegisterChange}
-                                style={styles.select}
-                                disabled={loading}
-                            >
-                                <option value="ADMIN">ADMIN</option>
-                                <option value="OPERATOR">OPERATOR</option>
-                                <option value="USER">USER</option>
-                            </select>
-                        </div>
-
                         <button type="submit" style={styles.submitBtn} disabled={loading}>
                             {loading ? "Registering..." : "Create Account"}
                         </button>
+
                     </form>
                 )}
             </div>

@@ -6,7 +6,9 @@ from database.db import db
 
 def register_user(data):
     """
-    Register a new user.
+    Register a new public user.
+    Public registration is strictly forced to role='USER'.
+    Client-supplied role parameters are ignored to prevent privilege escalation.
     """
 
     existing_user = User.query.filter_by(email=data["email"]).first()
@@ -26,7 +28,7 @@ def register_user(data):
         full_name=data["full_name"],
         email=data["email"],
         password=hashed_password,
-        role=data.get("role", "ADMIN")
+        role="USER"  # Hard-enforced server-side: public registration ALWAYS creates USER accounts
     )
 
     db.session.add(user)
@@ -41,7 +43,7 @@ def register_user(data):
 
 def login_user(data):
     """
-    Authenticate user.
+    Authenticate user credentials.
     """
 
     user = User.query.filter_by(email=data["email"]).first()
@@ -72,7 +74,7 @@ def login_user(data):
 
 def get_all_users():
     """
-    Fetch all users.
+    Fetch all users directory.
     """
 
     users = User.query.all()
@@ -95,35 +97,69 @@ def get_user_by_id(user_id):
 
 def update_user(user_id, data):
     """
-    Update user details.
+    Update user details with Last Admin Protection.
     """
 
     user = User.query.get(user_id)
 
     if user is None:
-        return None
+        return {
+            "success": False,
+            "message": "User not found"
+        }
+
+    new_role = data.get("role", user.role)
+    new_active = data.get("is_active", user.is_active)
+
+    # Last Admin Protection: Prevent demoting or deactivating the final remaining administrator
+    if user.role == "ADMIN" and (new_role != "ADMIN" or not new_active):
+        active_admin_count = User.query.filter_by(role="ADMIN", is_active=True).count()
+        if active_admin_count <= 1:
+            return {
+                "success": False,
+                "message": "Cannot delete or demote the last administrator."
+            }
 
     user.full_name = data.get("full_name", user.full_name)
     user.email = data.get("email", user.email)
-    user.role = data.get("role", user.role)
-    user.is_active = data.get("is_active", user.is_active)
+    user.role = new_role
+    user.is_active = new_active
 
     db.session.commit()
 
-    return user.to_dict()
+    return {
+        "success": True,
+        "message": "User updated successfully",
+        "data": user.to_dict()
+    }
 
 
 def delete_user(user_id):
     """
-    Delete a user.
+    Delete a user account with Last Admin Protection.
     """
 
     user = User.query.get(user_id)
 
     if user is None:
-        return False
+        return {
+            "success": False,
+            "message": "User not found"
+        }
+
+    # Last Admin Protection: Prevent deleting the final remaining administrator
+    if user.role == "ADMIN":
+        admin_count = User.query.filter_by(role="ADMIN").count()
+        if admin_count <= 1:
+            return {
+                "success": False,
+                "message": "Cannot delete or demote the last administrator."
+            }
 
     db.session.delete(user)
     db.session.commit()
 
-    return True
+    return {
+        "success": True,
+        "message": "User deleted successfully"
+    }

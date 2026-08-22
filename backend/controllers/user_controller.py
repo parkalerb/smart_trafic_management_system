@@ -112,27 +112,20 @@ def get_user(user_id):
 def edit_user(user_id):
     data = request.get_json() or {}
 
-    user = update_user(user_id, data)
+    result = update_user(user_id, data)
 
-    if user is None:
-        return jsonify({
-            "message": "User not found"
-        }), 404
+    if not result["success"]:
+        status_code = 404 if result.get("message") == "User not found" else 400
+        return jsonify(result), status_code
 
-    return jsonify({
-        "message": "User updated successfully",
-        "data": user
-    }), 200
+    return jsonify(result), 200
 
 
 def remove_user(user_id):
-    deleted = delete_user(user_id)
+    result = delete_user(user_id)
 
-    if not deleted:
-        return jsonify({
-            "message": "User not found"
-        }), 404
+    if not result["success"]:
+        status_code = 404 if result.get("message") == "User not found" else 400
+        return jsonify(result), status_code
 
-    return jsonify({
-        "message": "User deleted successfully"
-    }), 200
+    return jsonify(result), 200
