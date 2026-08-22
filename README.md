@@ -1,135 +1,791 @@
-# 🚦 Smart Traffic Management System
+🚦 Smart Traffic Management System
 
-An AI-powered Smart Traffic Management System that optimizes traffic signal timings based on real-time vehicle density using Computer Vision (OpenCV) and dynamic signal algorithms.
+An AI-powered Smart Traffic Management System that optimizes traffic signal timings based on vehicle density using Computer Vision (OpenCV) and dynamic signal algorithms.
 
-This project follows industry-standard Software Development Life Cycle (SDLC) practices, demonstrating full-stack React frontend design, Flask RESTful API architecture, MySQL database modeling, and OpenCV computer vision processing.
+The project is a complete full-stack application built with React + Vite, Flask REST APIs, MySQL, and OpenCV. It includes authentication, role-based access control, traffic signal management, dashboard analytics, vehicle detection, congestion classification, and dynamic green-signal timing.
 
----
+The system was developed using an industry-oriented Software Development Life Cycle (SDLC) approach and is deployed for production use.
 
-## 🎯 Key Features
+🌐 Live Demo
 
-- **📊 Live Traffic Dashboard**: Real-time KPI statistics cards, signal counts, user counts, and complete traffic signal management table.
-- **📈 Traffic Analytics & Data Visualizations**: Interactive `Chart.js` Doughnut charts (Active vs Inactive signals) and grouped Bar charts (Green, Yellow, and Red cycle timing per location).
-- **🎥 Live OpenCV Vehicle Detection**: Real-time image/frame contour processing, vehicle counting, congestion level classification (`LOW`, `MEDIUM`, `HIGH`), and dynamic green signal timing calculation (`20s + vehicle_count * 3s`).
-- **👤 User Management & Authentication**: Tabbed login/registration portal, password security via bcrypt, React Context session persistence, protected client-side routes, and admin user account management (`ADMIN`, `OPERATOR`, `USER`).
-- **🔍 Signal Filtering & Search**: Instant location search and status filtering (`ACTIVE` / `INACTIVE`).
+Frontend
 
----
+Live Application:
+https://smart-traffic-management-frontend.onrender.com
 
-## 🛠️ Technology Stack
+Backend API
 
-- **Frontend**: React, Vite, React Router, Chart.js, React-Chartjs-2, Axios.
-- **Backend**: Python 3.10+, Flask, Flask-SQLAlchemy, Flask-CORS, PyMySQL, python-dotenv.
-- **Computer Vision**: OpenCV (`opencv-python`), NumPy.
-- **Database**: MySQL Server 8.0+.
+Backend Service:
+https://smart-trafic-management-system.onrender.com
 
----
+Database
 
-## 📂 Project Architecture & Directory Structure
+Production Database: Aiven MySQL
 
-```text
+🎯 Project Objectives
+
+Monitor and analyze traffic conditions through a centralized dashboard.
+
+Detect vehicles using OpenCV-based computer vision processing.
+
+Calculate vehicle density and classify congestion levels.
+
+Dynamically optimize traffic signal green time based on detected traffic.
+
+Provide traffic signal search, filtering, and management.
+
+Provide secure authentication and role-based access control.
+
+Provide separate access levels for ADMIN, OPERATOR, and USER.
+
+Visualize traffic and signal statistics using interactive charts.
+
+Deploy the complete application using cloud services.
+
+✨ Key Features
+
+📊 Live Traffic Dashboard
+
+Total traffic signal count.
+
+Active and inactive signal statistics.
+
+Total registered user count.
+
+Average and maximum green timing.
+
+Active signal percentage.
+
+Traffic analytics and visualizations.
+
+Signal timing comparison by location.
+
+📈 Traffic Analytics
+
+Active vs inactive signal Doughnut chart.
+
+Green, Yellow, and Red timing Bar chart.
+
+Location-based traffic signal analysis.
+
+Dashboard KPI cards.
+
+Responsive data visualization using Chart.js.
+
+🎥 OpenCV Vehicle Detection
+
+Vehicle detection using OpenCV.
+
+Image/frame processing.
+
+Gaussian blur and contour-based processing.
+
+Vehicle counting.
+
+Traffic congestion classification.
+
+Dynamic green signal timing calculation.
+
+Detection result visualization.
+
+🚦 Dynamic Traffic Signal Optimization
+
+The implemented signal timing logic uses:
+
+Green Time = 20 seconds + (Vehicle Count × 3 seconds)
+
+For example:
+
+Vehicle Count = 5
+
+Green Time = 20 + (5 × 3)
+           = 35 seconds
+
+The calculated timing is integrated into the traffic signal workflow.
+
+🔐 Authentication & Role-Based Access Control
+
+The application supports:
+
+ADMIN
+
+OPERATOR
+
+USER
+
+Each role has different permissions and access levels.
+
+🔍 Signal Search & Filtering
+
+Search signals by location.
+
+Filter signals by active/inactive status.
+
+View traffic signal timings.
+
+Manage signals according to user permissions.
+
+🖥️ Application Screenshots
+
+The following screenshots showcase the major functionality of the deployed system.
+
+Note: Authentication/register and user-management screenshots are intentionally not included here because they contain test/user email information.
+
+👨‍💼 ADMIN
+
+📊 Admin Dashboard & Analytics
+
+
+
+The admin dashboard provides KPI cards, signal statistics, traffic analytics, and signal timing visualizations.
+
+🚦 Admin Traffic Signal Directory
+
+
+
+Administrators can search, filter, view, and manage traffic signals.
+
+🎥 Admin Vehicle Detection
+
+
+
+The detection module displays vehicle detection results, traffic density, and dynamic signal timing information.
+
+👷 OPERATOR
+
+📊 Operator Dashboard & Analytics
+
+
+
+Operators can monitor traffic conditions and review dashboard analytics.
+
+🎥 Operator Vehicle Detection
+
+
+
+Operators can use the vehicle detection module for traffic monitoring and signal optimization.
+
+👤 USER
+
+📊 User Dashboard
+
+
+
+Users have access to the dashboard and traffic information according to their assigned permissions.
+
+🎥 User Detection — View Mode
+
+
+
+Users can view traffic detection information without administrative management permissions.
+
+🔐 Role-Based Access Control
+
+Feature
+
+ADMIN
+
+OPERATOR
+
+USER
+
+Authentication
+
+✅
+
+✅
+
+✅
+
+Dashboard
+
+✅
+
+✅
+
+✅
+
+Traffic Analytics
+
+✅
+
+✅
+
+✅
+
+View Traffic Signals
+
+✅
+
+✅
+
+✅
+
+Manage Traffic Signals
+
+✅
+
+✅
+
+❌
+
+Vehicle Detection
+
+✅
+
+✅
+
+View
+
+Dynamic Signal Timing
+
+✅
+
+✅
+
+View
+
+User Management
+
+✅
+
+❌
+
+❌
+
+🏗️ System Architecture
+
+                         SMART TRAFFIC MANAGEMENT SYSTEM
+                                      │
+                    ┌─────────────────┴─────────────────┐
+                    │                                   │
+                    ▼                                   ▼
+          ┌───────────────────┐               ┌───────────────────┐
+          │   React Frontend  │               │   Flask Backend   │
+          │   Vite            │◄─────────────►│   REST APIs       │
+          │   React Router    │     HTTP      │   Controllers     │
+          │   Axios           │               │   Services        │
+          └───────────────────┘               └─────────┬─────────┘
+                                                        │
+                                  ┌─────────────────────┼─────────────────────┐
+                                  │                     │                     │
+                                  ▼                     ▼                     ▼
+                         ┌────────────────┐   ┌────────────────┐   ┌────────────────┐
+                         │ OpenCV Engine  │   │ SQLAlchemy ORM │   │ Authentication │
+                         │ Vehicle        │   │                │   │ & RBAC         │
+                         │ Detection      │   │                │   │                │
+                         └────────────────┘   └───────┬────────┘   └────────────────┘
+                                                      │
+                                                      ▼
+                                             ┌─────────────────┐
+                                             │   Aiven MySQL   │
+                                             │   Production DB │
+                                             └─────────────────┘
+
+🔄 How the System Works
+
+Traffic Image / Frame
+        │
+        ▼
+OpenCV Processing
+        │
+        ▼
+Vehicle Detection
+        │
+        ▼
+Vehicle Count
+        │
+        ▼
+Congestion Classification
+LOW / MEDIUM / HIGH
+        │
+        ▼
+Dynamic Green-Time Calculation
+        │
+        ▼
+Flask REST API
+        │
+        ▼
+MySQL Database
+        │
+        ▼
+React Dashboard
+        │
+        ▼
+Traffic Monitoring & Signal Management
+
+🧠 Computer Vision & Traffic Logic
+
+The vehicle detection workflow uses OpenCV and NumPy for image/frame processing.
+
+Processing Flow
+
+Input Frame
+    ↓
+Image Pre-processing
+    ↓
+Gaussian Blur
+    ↓
+Contour Detection
+    ↓
+Vehicle Area Filtering
+    ↓
+Vehicle Count
+    ↓
+Congestion Level
+    ↓
+Dynamic Green Time
+
+Dynamic Timing Formula
+
+Base Green Time = 20 seconds
+Vehicle Factor  = 3 seconds per vehicle
+
+Optimized Green Time
+= 20 + (vehicle_count × 3)
+
+Example:
+
+Detected Vehicles : 5
+Green Time        : 35 seconds
+
+🗄️ Database
+
+The application uses MySQL with SQLAlchemy ORM.
+
+The database layer stores application information such as:
+
+Users
+
+Traffic signals
+
+Signal status
+
+Green timing
+
+Yellow timing
+
+Red timing
+
+Traffic-related system data
+
+Production database:
+
+Aiven MySQL
+
+Database design documentation:
+
+docs/database_design.md
+
+🔌 REST API
+
+The Flask backend provides RESTful endpoints for the frontend.
+
+Authentication
+
+POST /users/register
+POST /users/login
+POST /users/logout
+GET  /users/me
+
+Traffic Signals
+
+GET    /signals
+POST   /signals
+GET    /signals/<signal_id>
+PUT    /signals/<signal_id>
+DELETE /signals/<signal_id>
+GET    /signals/search
+GET    /signals/filter
+
+Users
+
+GET    /users
+GET    /users/<user_id>
+PUT    /users/<user_id>
+DELETE /users/<user_id>
+
+Dashboard
+
+GET /dashboard/stats
+GET /dashboard/analytics
+
+Vehicle Detection
+
+GET  /detection/status/<signal_id>
+POST /detection/process
+
+🛠️ Technology Stack
+
+Frontend
+
+React
+
+Vite
+
+React Router
+
+Axios
+
+Chart.js
+
+React-Chartjs-2
+
+HTML5
+
+CSS3
+
+JavaScript
+
+Backend
+
+Python
+
+Flask
+
+Flask-SQLAlchemy
+
+Flask-CORS
+
+PyMySQL
+
+python-dotenv
+
+Werkzeug
+
+Computer Vision
+
+OpenCV
+
+NumPy
+
+Contour-based processing
+
+Gaussian Blur
+
+Database
+
+MySQL
+
+SQLAlchemy ORM
+
+Aiven MySQL for production
+
+Development & Testing
+
+Visual Studio Code
+
+Git
+
+GitHub
+
+Postman
+
+Deployment
+
+Render — Frontend
+
+Render — Backend
+
+Aiven — MySQL
+
+📂 Project Structure
+
 smart_trafic_management_system/
+│
 ├── backend/
-│   ├── app.py                 # Flask application entry point
-│   ├── config.py              # Environment configuration loader
-│   ├── routes.py              # API route registry
-│   ├── controllers/           # HTTP request handlers
-│   ├── services/              # Business logic & OpenCV engine
-│   ├── models/                # SQLAlchemy database models
-│   ├── database/              # DB connection initialization
-│   └── .env.example           # Backend environment template
+│   ├── app.py
+│   ├── config.py
+│   ├── routes.py
+│   ├── controllers/
+│   ├── services/
+│   ├── models/
+│   ├── database/
+│   ├── requirements.txt
+│   └── .env.example
 │
 ├── frontend/
 │   ├── src/
-│   │   ├── components/        # UI components (dashboard, signals, users, layout)
-│   │   ├── context/           # React AuthContext
-│   │   ├── pages/             # Dashboard, Detection, Users, Login pages
-│   │   └── services/          # Axios API service layer (api.js, signalService.js, etc.)
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── pages/
+│   │   └── services/
 │   ├── index.html
 │   ├── vite.config.js
-│   └── .env.example           # Frontend environment template
+│   ├── package.json
+│   └── .env.example
 │
 ├── docs/
-│   ├── deployment_guide.md    # Production deployment documentation
-│   ├── database_design.md    # Database ER diagrams and schema specifications
+│   ├── screenshots/
+│   │   ├── admin/
+│   │   │   ├── dashboard.png
+│   │   │   ├── traffic_signals.png
+│   │   │   └── detection.png
+│   │   ├── operator/
+│   │   │   ├── dashboard.png
+│   │   │   └── detection.png
+│   │   └── user/
+│   │       ├── dashboard.png
+│   │       └── detection.png
+│   │
+│   ├── deployment_guide.md
+│   ├── database_design.md
 │   └── system_architecture.mcd
-├── .gitignore                 # Root Git exclusion rules
-└── README.md                  # Project documentation
-```
+│
+├── .gitignore
+└── README.md
 
----
+⚡ Quick Start
 
-## ⚡ Quick Start & Development Setup
+Backend
 
-### 1. Backend Setup
+Navigate to the backend:
 
-1. **Navigate to backend directory**:
-   ```bash
-   cd backend
-   ```
+cd backend
 
-2. **Create virtual environment & install dependencies**:
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
+Create a virtual environment:
 
-3. **Configure Environment Variables**:
-   Create a `.env` file based on `.env.example`:
-   ```bash
-   cp .env.example .env
-   ```
-   *Configure your local MySQL connection in `DATABASE_URL`.*
+python -m venv .venv
 
-4. **Run Development Server**:
-   ```bash
-   python app.py
-   ```
-   *Backend starts at `http://127.0.0.1:5000`.*
+Windows
 
----
+.venv\Scripts\activate
 
-### 2. Frontend Setup
+Linux / macOS
 
-1. **Navigate to frontend directory**:
-   ```bash
-   cd frontend
-   ```
+source .venv/bin/activate
 
-2. **Install Node.js dependencies**:
-   ```bash
-   npm install
-   ```
+Install dependencies:
 
-3. **Configure Environment Variables (Optional)**:
-   Create a `.env` file based on `.env.example`:
-   ```bash
-   VITE_API_BASE_URL=http://127.0.0.1:5000
-   ```
+pip install -r requirements.txt
 
-4. **Run Development Server**:
-   ```bash
-   npm run dev
-   ```
-   *Frontend starts at `http://localhost:5173`.*
+Create a .env file from .env.example and configure the database and secret key.
 
----
+Run the backend:
 
-## 📦 Production Build Instructions
+python app.py
 
-To generate optimized static assets for production deployment:
+Backend:
 
-```bash
+http://127.0.0.1:5000
+
+Frontend
+
+Open another terminal:
+
+cd frontend
+
+Install dependencies:
+
+npm install
+
+Create:
+
+frontend/.env
+
+Add:
+
+VITE_API_BASE_URL=http://127.0.0.1:5000
+
+Run:
+
+npm run dev
+
+Frontend:
+
+http://localhost:5173
+
+🔑 Environment Variables
+
+Backend
+
+FLASK_ENV=development
+SECRET_KEY=your-secret-key
+DATABASE_URL=mysql+pymysql://username:password@localhost/database
+
+Frontend
+
+VITE_API_BASE_URL=http://127.0.0.1:5000
+
+For production, configure environment variables directly in the deployment platform.
+
+Never commit real passwords, database credentials, API keys, or production secret keys to GitHub.
+
+📦 Production Build
+
+Build the frontend:
+
 cd frontend
 npm run build
-```
 
-The production assets will be generated in `frontend/dist/`. Refer to [docs/deployment_guide.md](docs/deployment_guide.md) for production server setup.
+Production assets are generated in:
 
----
+frontend/dist/
 
-## 👨‍💻 Author
+The deployed application uses:
 
-**Rohan Parkale**
-- MCA Student & Full-Stack / ML Developer
+Frontend → Render
+Backend  → Render
+Database → Aiven MySQL
+
+🧪 Testing & Verification
+
+The completed system was tested across the following areas:
+
+User registration and login.
+
+Authentication/session handling.
+
+Protected routes.
+
+Role-based access control.
+
+Traffic signal CRUD operations.
+
+Signal search and filtering.
+
+Dashboard statistics.
+
+Dashboard analytics.
+
+Vehicle detection.
+
+Congestion classification.
+
+Dynamic green-time calculation.
+
+Frontend/backend API communication.
+
+Production database connectivity.
+
+Production deployment.
+
+📚 Documentation
+
+Additional project documentation is available in the docs/ directory:
+
+docs/
+├── deployment_guide.md
+├── database_design.md
+├── system_architecture.mcd
+└── screenshots/
+
+🏆 Project Highlights
+
+This project demonstrates practical experience with:
+
+Full-stack application development.
+
+REST API architecture.
+
+React component-based development.
+
+Flask backend development.
+
+MySQL database design and integration.
+
+SQLAlchemy ORM.
+
+Authentication and authorization.
+
+Role-Based Access Control.
+
+Computer Vision with OpenCV.
+
+Vehicle density analysis.
+
+Dynamic traffic signal optimization.
+
+Data visualization with Chart.js.
+
+Environment-based configuration.
+
+Git/GitHub workflow.
+
+Cloud deployment.
+
+SDLC-oriented project development.
+
+🔮 Future Enhancements
+
+Potential future improvements include:
+
+Real CCTV/video-stream integration.
+
+Advanced vehicle detection using YOLO.
+
+Multi-camera intersection monitoring.
+
+Historical traffic trend analysis.
+
+Machine Learning-based traffic prediction.
+
+Emergency vehicle priority detection.
+
+IoT-based traffic signal controller integration.
+
+Real-time notifications and alerts.
+
+Mobile application for traffic operators.
+
+Advanced cloud monitoring and observability.
+
+✅ Project Status
+
+🎉 Completed & Deployed
+
+The core Smart Traffic Management System has been completed and deployed.
+
+Implemented
+
+✅ React + Vite frontend
+
+✅ Flask REST API backend
+
+✅ MySQL database
+
+✅ Aiven production database
+
+✅ Authentication
+
+✅ Role-based access control
+
+✅ Admin / Operator / User roles
+
+✅ Traffic signal management
+
+✅ Search and filtering
+
+✅ Dashboard KPIs
+
+✅ Chart.js analytics
+
+✅ OpenCV vehicle detection
+
+✅ Congestion classification
+
+✅ Dynamic green signal timing
+
+✅ Production environment configuration
+
+✅ Render frontend deployment
+
+✅ Render backend deployment
+
+✅ Production frontend-backend integration
+
+✅ Final project documentation
+
+👨‍💻 Author
+
+Rohan Parkale
+
+MCA Student | Full-Stack & ML Developer
+
+GitHub: https://github.com/parkalerb
+
+Portfolio: https://rohanparkale.netlify.app
+
+⭐ Show Your Support
+
+If you find this project useful or interesting, consider giving the repository a ⭐ on GitHub.
