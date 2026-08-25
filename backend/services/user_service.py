@@ -41,6 +41,50 @@ def register_user(data):
     }
 
 
+def create_user_admin(data):
+    """
+    Create a new user by an authenticated ADMIN.
+    Allows ADMIN to explicitly assign any valid role (USER, OPERATOR, ADMIN) and status (is_active).
+    """
+
+    existing_user = User.query.filter_by(email=data["email"]).first()
+
+    if existing_user:
+        return {
+            "success": False,
+            "message": "Email already registered."
+        }
+
+    role = data.get("role", "USER")
+    if role not in ["USER", "OPERATOR", "ADMIN"]:
+        return {
+            "success": False,
+            "message": "Invalid role specified."
+        }
+
+    hashed_password = bcrypt.hashpw(
+        data["password"].encode("utf-8"),
+        bcrypt.gensalt()
+    ).decode("utf-8")
+
+    user = User(
+        full_name=data["full_name"],
+        email=data["email"],
+        password=hashed_password,
+        role=role,
+        is_active=bool(data.get("is_active", True))
+    )
+
+    db.session.add(user)
+    db.session.commit()
+
+    return {
+        "success": True,
+        "message": "User account created successfully.",
+        "data": user.to_dict()
+    }
+
+
 def login_user(data):
     """
     Authenticate user credentials.

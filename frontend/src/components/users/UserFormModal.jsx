@@ -12,7 +12,8 @@ function UserFormModal({
     const [formData, setFormData] = useState({
         full_name: "",
         email: "",
-        role: "ADMIN",
+        password: "",
+        role: "USER",
         is_active: true
     });
 
@@ -23,14 +24,16 @@ function UserFormModal({
             setFormData({
                 full_name: initialData.full_name || "",
                 email: initialData.email || "",
-                role: initialData.role || "ADMIN",
+                password: "",
+                role: initialData.role || "USER",
                 is_active: initialData.is_active ?? true
             });
         } else {
             setFormData({
                 full_name: "",
                 email: "",
-                role: "ADMIN",
+                password: "",
+                role: "USER",
                 is_active: true
             });
         }
@@ -45,7 +48,10 @@ function UserFormModal({
             errs.full_name = "Full name is required.";
         }
         if (!formData.email.trim()) {
-            errs.email = "Email is required.";
+            errs.email = "Email address is required.";
+        }
+        if (!isEditing && !formData.password) {
+            errs.password = "Password is required.";
         }
         setErrors(errs);
         return Object.keys(errs).length === 0;
@@ -66,19 +72,25 @@ function UserFormModal({
         e.preventDefault();
         if (!validate()) return;
 
-        onSubmit({
+        const payload = {
             full_name: formData.full_name.trim(),
             email: formData.email.trim(),
             role: formData.role,
             is_active: Boolean(formData.is_active)
-        });
+        };
+
+        if (!isEditing) {
+            payload.password = formData.password;
+        }
+
+        onSubmit(payload);
     };
 
     return (
         <div style={styles.overlay}>
             <div style={styles.modal}>
                 <div style={styles.header}>
-                    <h3 style={{ margin: 0 }}>
+                    <h3 style={{ margin: 0, color: "#1e293b" }}>
                         {isEditing ? "Edit User Account" : "Add New User Account"}
                     </h3>
                     <button onClick={onClose} style={styles.closeBtn} disabled={loading}>
@@ -127,6 +139,27 @@ function UserFormModal({
                         )}
                     </div>
 
+                    {!isEditing && (
+                        <div style={styles.fieldGroup}>
+                            <label style={styles.label}>Password *</label>
+                            <input
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                placeholder="••••••••"
+                                style={{
+                                    ...styles.input,
+                                    borderColor: errors.password ? "#d32f2f" : "#ccc"
+                                }}
+                                disabled={loading}
+                            />
+                            {errors.password && (
+                                <span style={styles.errorText}>{errors.password}</span>
+                            )}
+                        </div>
+                    )}
+
                     <div style={styles.fieldGroup}>
                         <label style={styles.label}>Role</label>
                         <select
@@ -136,9 +169,9 @@ function UserFormModal({
                             style={styles.select}
                             disabled={loading}
                         >
-                            <option value="ADMIN">ADMIN</option>
-                            <option value="OPERATOR">OPERATOR</option>
                             <option value="USER">USER</option>
+                            <option value="OPERATOR">OPERATOR</option>
+                            <option value="ADMIN">ADMIN</option>
                         </select>
                     </div>
 
@@ -171,7 +204,7 @@ function UserFormModal({
                                     : "Creating..."
                                 : isEditing
                                 ? "Update User"
-                                : "Save User"}
+                                : "Create User"}
                         </button>
                     </div>
                 </form>

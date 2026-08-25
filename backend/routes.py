@@ -10,6 +10,7 @@ from controllers.signal_controller import (
 
 from controllers.user_controller import (
     register,
+    add_user,
     login,
     logout,
     get_current_user,
@@ -100,6 +101,11 @@ def register_routes(app):
     @require_role(["ADMIN"])
     def fetch_all_users():
         return get_users()
+
+    @app.route("/users", methods=["POST"])
+    @require_role(["ADMIN"])
+    def create_user_route():
+        return add_user()
 
     @app.route("/users/<int:user_id>", methods=["GET"])
     @require_role(["ADMIN"])

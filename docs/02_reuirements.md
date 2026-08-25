@@ -7,7 +7,7 @@ The system should be able to:
 - Manage traffic signals
 - Detect vehicle density
 - Display traffic dashboard
-- Monitor multiple traffic lanes
+- Monitor multiple traffic lanes 
 - Generate traffic reports
 - Store traffic history
 - Provide administrator login

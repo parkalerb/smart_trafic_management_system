@@ -3,9 +3,13 @@ import Layout from "../components/layout/Layout";
 import DashboardCard from "../components/dashboard/DashboardCard";
 import UserFormModal from "../components/users/UserFormModal";
 import UserDeleteModal from "../components/users/UserDeleteModal";
-import { getUsers, updateUser, deleteUser } from "../services/userService";
+import { getUsers, createUser, updateUser, deleteUser } from "../services/userService";
+import { useAuth } from "../context/AuthContext";
 
 function Users() {
+    const { user } = useAuth();
+    const isAdmin = user?.role === "ADMIN";
+
     const [users, setUsers] = useState([]);
     const [search, setSearch] = useState("");
     const [roleFilter, setRoleFilter] = useState("ALL");
@@ -58,26 +62,35 @@ function Users() {
         return matchesSearch && matchesRole;
     });
 
-    const handleOpenEditModal = (user) => {
-        setEditingUser(user);
+    const handleOpenAddModal = () => {
+        setEditingUser(null);
         setApiError(null);
         setIsFormOpen(true);
     };
 
-    const handleOpenDeleteModal = (user) => {
-        setDeletingUser(user);
+    const handleOpenEditModal = (targetUser) => {
+        setEditingUser(targetUser);
+        setApiError(null);
+        setIsFormOpen(true);
+    };
+
+    const handleOpenDeleteModal = (targetUser) => {
+        setDeletingUser(targetUser);
         setApiError(null);
         setIsDeleteOpen(true);
     };
 
     const handleFormSubmit = async (formData) => {
-        if (!editingUser) return;
-
         setActionLoading(true);
         setApiError(null);
         try {
-            await updateUser(editingUser.id, formData);
-            showToast(`User account "${formData.full_name}" updated successfully!`);
+            if (editingUser) {
+                await updateUser(editingUser.id, formData);
+                showToast(`User account "${formData.full_name}" updated successfully!`);
+            } else {
+                await createUser(formData);
+                showToast(`User account "${formData.full_name}" created successfully!`);
+            }
             setIsFormOpen(false);
             setEditingUser(null);
             await loadUsers();
@@ -85,7 +98,7 @@ function Users() {
             const msg =
                 err.response?.data?.message ||
                 err.message ||
-                "Failed to update user account.";
+                "Failed to process user account.";
             setApiError(msg);
         } finally {
             setActionLoading(false);
@@ -118,6 +131,11 @@ function Users() {
         <Layout>
             <div style={styles.headerRow}>
                 <h2 style={{ margin: 0, color: "#1e293b" }}>User Management Directory</h2>
+                {isAdmin && (
+                    <button onClick={handleOpenAddModal} style={styles.addBtn}>
+                        ➕ Add User
+                    </button>
+                )}
             </div>
 
             {/* Success Toast Notification */}
@@ -228,13 +246,13 @@ function Users() {
                 )}
             </div>
 
-            {/* Edit User Modal */}
+            {/* Edit / Add User Modal */}
             <UserFormModal
                 isOpen={isFormOpen}
                 onClose={() => setIsFormOpen(false)}
                 onSubmit={handleFormSubmit}
                 initialData={editingUser}
-                isEditing={true}
+                isEditing={!!editingUser}
                 loading={actionLoading}
                 apiError={apiError}
             />
@@ -257,6 +275,18 @@ const styles = {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center"
+    },
+    addBtn: {
+        background: "#2e7d32",
+        color: "#ffffff",
+        border: "none",
+        padding: "10px 18px",
+        borderRadius: "6px",
+        fontSize: "14px",
+        fontWeight: "bold",
+        cursor: "pointer",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+        transition: "background 0.2s ease"
     },
     toast: {
         background: "#e8f5e9",

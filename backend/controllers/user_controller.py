@@ -2,6 +2,7 @@ from flask import request, jsonify, session
 
 from services.user_service import (
     register_user,
+    create_user_admin,
     login_user,
     get_all_users,
     get_user_by_id,
@@ -20,7 +21,7 @@ def register():
     ]
 
     for field in required_fields:
-        if field not in data:
+        if not data.get(field):
             return jsonify({
                 "message": f"{field} is required"
             }), 400
@@ -36,6 +37,29 @@ def register():
     return jsonify(result), 201
 
 
+def add_user():
+    data = request.get_json() or {}
+
+    required_fields = [
+        "full_name",
+        "email",
+        "password"
+    ]
+
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({
+                "message": f"{field} is required"
+            }), 400
+
+    result = create_user_admin(data)
+
+    if not result["success"]:
+        return jsonify(result), 400
+
+    return jsonify(result), 201
+
+
 def login():
     data = request.get_json() or {}
 
@@ -45,7 +69,7 @@ def login():
     ]
 
     for field in required_fields:
-        if field not in data:
+        if not data.get(field):
             return jsonify({
                 "message": f"{field} is required"
             }), 400
