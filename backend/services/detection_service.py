@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import base64
-from models.traffic_signal import TrafficSignal
+from models import TrafficSignal, TrafficDetection
 from database.db import db
 
 def process_frame_detection(image_bytes=None):
@@ -64,7 +64,7 @@ def get_congestion_level(vehicle_count):
 def run_detection_for_signal(signal_id, update_db=True, image_base64=None):
     """
     Run vehicle detection for a specific traffic signal, calculate dynamic green time,
-    and update signal configuration in database if requested.
+    save detection history record, and update signal configuration in database if requested.
     """
     signal = TrafficSignal.query.get(signal_id)
     if signal is None:
@@ -89,15 +89,26 @@ def run_detection_for_signal(signal_id, update_db=True, image_base64=None):
     calculated_green = calculate_green_time(vehicle_count)
     congestion_level = get_congestion_level(vehicle_count)
 
-    # Update database record if requested
+    # Save detection history record
+    detection_record = TrafficDetection(
+        signal_id=signal.id,
+        vehicle_count=vehicle_count,
+        congestion_level=congestion_level,
+        green_time=calculated_green
+    )
+    db.session.add(detection_record)
+
+    # Update signal green_time in database if requested
     if update_db:
         signal.green_time = calculated_green
-        db.session.commit()
+
+    db.session.commit()
 
     return {
         "success": True,
         "message": "Vehicle detection completed successfully.",
         "data": {
+            "id": detection_record.id,
             "signal_id": signal.id,
             "location": signal.location,
             "camera_status": "ONLINE",
@@ -107,7 +118,8 @@ def run_detection_for_signal(signal_id, update_db=True, image_base64=None):
             "previous_green_time": signal.green_time,
             "yellow_time": signal.yellow_time,
             "red_time": signal.red_time,
-            "signal_status": signal.status
+            "signal_status": signal.status,
+            "detected_at": detection_record.detected_at.isoformat() if detection_record.detected_at else None
         }
     }
 

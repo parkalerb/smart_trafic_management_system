@@ -21,7 +21,9 @@ from controllers.user_controller import (
 )
 from controllers.dashboard_controller import (
     dashboard_stats,
-    dashboard_analytics
+    dashboard_analytics,
+    traffic_history,
+    traffic_summary
 )
 
 from controllers.detection_controller import (
@@ -132,6 +134,16 @@ def register_routes(app):
     @require_role(["ADMIN", "OPERATOR", "USER"])
     def get_dashboard_analytics_route():
         return dashboard_analytics()
+
+    @app.route("/analytics/traffic-history", methods=["GET"])
+    @require_role(["ADMIN", "OPERATOR", "USER"])
+    def get_traffic_history_route():
+        return traffic_history()
+
+    @app.route("/analytics/traffic-summary", methods=["GET"])
+    @require_role(["ADMIN", "OPERATOR", "USER"])
+    def get_traffic_summary_route():
+        return traffic_summary()
 
     # OpenCV Detection Routes
     @app.route("/detection/status/<int:signal_id>", methods=["GET"])

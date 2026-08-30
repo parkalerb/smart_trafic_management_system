@@ -1,4 +1,4 @@
-from models import TrafficSignal, User
+from models import TrafficSignal, User, TrafficDetection
 from database.db import db
 from sqlalchemy import func
 
@@ -73,4 +73,51 @@ def get_dashboard_analytics():
         "minimum_green_time": minimum_green_time,
         "active_percentage": active_percentage,
         "inactive_percentage": inactive_percentage
+    }
+
+
+def get_traffic_history(signal_id=None, congestion_level=None, limit=100):
+    """
+    Fetch recent traffic detection history with optional filters.
+    """
+    query = TrafficDetection.query
+    if signal_id:
+        query = query.filter_by(signal_id=signal_id)
+    if congestion_level:
+        query = query.filter_by(congestion_level=congestion_level)
+
+    detections = query.order_by(TrafficDetection.detected_at.desc()).limit(limit).all()
+    return [d.to_dict() for d in detections]
+
+
+def get_traffic_summary():
+    """
+    Compute summary metrics over all detection history records.
+    """
+    total_detections = TrafficDetection.query.count()
+
+    total_vehicles = db.session.query(
+        func.sum(TrafficDetection.vehicle_count)
+    ).scalar() or 0
+
+    average_vehicle_count = db.session.query(
+        func.avg(TrafficDetection.vehicle_count)
+    ).scalar() or 0
+
+    low_congestion = TrafficDetection.query.filter_by(congestion_level="LOW").count()
+    medium_congestion = TrafficDetection.query.filter_by(congestion_level="MEDIUM").count()
+    high_congestion = TrafficDetection.query.filter_by(congestion_level="HIGH").count()
+
+    average_green_time = db.session.query(
+        func.avg(TrafficDetection.green_time)
+    ).scalar() or 0
+
+    return {
+        "total_detections": total_detections,
+        "total_vehicles": total_vehicles,
+        "average_vehicle_count": round(average_vehicle_count, 1),
+        "low_congestion": low_congestion,
+        "medium_congestion": medium_congestion,
+        "high_congestion": high_congestion,
+        "average_green_time": round(average_green_time, 1)
     }
