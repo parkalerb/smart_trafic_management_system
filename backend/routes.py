@@ -17,7 +17,8 @@ from controllers.user_controller import (
     get_users,
     get_user,
     edit_user,
-    remove_user
+    remove_user,
+    fetch_audit_logs
 )
 from controllers.dashboard_controller import (
     dashboard_stats,
@@ -123,6 +124,12 @@ def register_routes(app):
     @require_role(["ADMIN"])
     def delete_user_route(user_id):
         return remove_user(user_id)
+
+    # Audit Logs Route - ADMIN only
+    @app.route("/audit-logs", methods=["GET"])
+    @require_role(["ADMIN"])
+    def get_audit_logs_route():
+        return fetch_audit_logs()
 
     # Dashboard & Analytics - Viewable by ALL roles
     @app.route("/dashboard/stats", methods=["GET"])

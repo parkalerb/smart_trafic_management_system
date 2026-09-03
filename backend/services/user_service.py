@@ -1,6 +1,6 @@
 import bcrypt
 
-from models import User
+from models import User, AuditLog
 from database.db import db
 
 
@@ -41,9 +41,9 @@ def register_user(data):
     }
 
 
-def create_user_admin(data):
+def create_user_admin(data, actor_id=None):
     """
-    Create a new user by an authenticated ADMIN.
+    Create a new user by an authenticated ADMIN and record audit log.
     Allows ADMIN to explicitly assign any valid role (USER, OPERATOR, ADMIN) and status (is_active).
     """
 
@@ -76,6 +76,19 @@ def create_user_admin(data):
     )
 
     db.session.add(user)
+    db.session.flush()
+
+    if actor_id:
+        audit = AuditLog(
+            actor_user_id=actor_id,
+            action="CREATE_USER",
+            target_user_id=user.id,
+            target_name=user.full_name,
+            target_email=user.email,
+            details=f"Created user with role {user.role}"
+        )
+        db.session.add(audit)
+
     db.session.commit()
 
     return {
@@ -139,9 +152,9 @@ def get_user_by_id(user_id):
     return user.to_dict()
 
 
-def update_user(user_id, data):
+def update_user(user_id, data, actor_id=None):
     """
-    Update user details with Last Admin Protection.
+    Update user details with Last Admin Protection and Audit Logging.
     """
 
     user = User.query.get(user_id)
@@ -154,6 +167,8 @@ def update_user(user_id, data):
 
     new_role = data.get("role", user.role)
     new_active = data.get("is_active", user.is_active)
+    new_name = data.get("full_name", user.full_name)
+    new_email = data.get("email", user.email)
 
     # Last Admin Protection: Prevent demoting or deactivating the final remaining administrator
     if user.role == "ADMIN" and (new_role != "ADMIN" or not new_active):
@@ -164,10 +179,40 @@ def update_user(user_id, data):
                 "message": "Cannot delete or demote the last administrator."
             }
 
-    user.full_name = data.get("full_name", user.full_name)
-    user.email = data.get("email", user.email)
+    # Track changes for audit logging
+    old_role = user.role
+    old_active = user.is_active
+
+    role_changed = old_role != new_role
+    active_changed = old_active != new_active
+
+    if role_changed:
+        action = "CHANGE_ROLE"
+        details = f"Role changed from {old_role} to {new_role}"
+        if active_changed:
+            details += f"; account {'activated' if new_active else 'deactivated'}"
+    elif active_changed:
+        action = "ACTIVATE_USER" if new_active else "DEACTIVATE_USER"
+        details = f"Account {'activated' if new_active else 'deactivated'}"
+    else:
+        action = "UPDATE_USER"
+        details = "Updated user profile details"
+
+    user.full_name = new_name
+    user.email = new_email
     user.role = new_role
     user.is_active = new_active
+
+    if actor_id:
+        audit = AuditLog(
+            actor_user_id=actor_id,
+            action=action,
+            target_user_id=user.id,
+            target_name=user.full_name,
+            target_email=user.email,
+            details=details
+        )
+        db.session.add(audit)
 
     db.session.commit()
 
@@ -178,9 +223,9 @@ def update_user(user_id, data):
     }
 
 
-def delete_user(user_id):
+def delete_user(user_id, actor_id=None):
     """
-    Delete a user account with Last Admin Protection.
+    Delete a user account with Last Admin Protection and Audit Logging.
     """
 
     user = User.query.get(user_id)
@@ -200,10 +245,34 @@ def delete_user(user_id):
                 "message": "Cannot delete or demote the last administrator."
             }
 
+    target_id = user.id
+    target_name = user.full_name
+    target_email = user.email
+
     db.session.delete(user)
+
+    if actor_id:
+        audit = AuditLog(
+            actor_user_id=actor_id,
+            action="DELETE_USER",
+            target_user_id=target_id,
+            target_name=target_name,
+            target_email=target_email,
+            details=f"Deleted user account ({target_email})"
+        )
+        db.session.add(audit)
+
     db.session.commit()
 
     return {
         "success": True,
         "message": "User deleted successfully"
     }
+
+
+def get_all_audit_logs(limit=100):
+    """
+    Fetch recent audit log records.
+    """
+    logs = AuditLog.query.order_by(AuditLog.created_at.desc()).limit(limit).all()
+    return [log.to_dict() for log in logs]

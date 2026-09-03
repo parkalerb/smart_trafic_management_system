@@ -7,7 +7,8 @@ from services.user_service import (
     get_all_users,
     get_user_by_id,
     update_user,
-    delete_user
+    delete_user,
+    get_all_audit_logs
 )
 
 
@@ -39,6 +40,7 @@ def register():
 
 def add_user():
     data = request.get_json() or {}
+    actor_id = session.get("user_id")
 
     required_fields = [
         "full_name",
@@ -52,7 +54,7 @@ def add_user():
                 "message": f"{field} is required"
             }), 400
 
-    result = create_user_admin(data)
+    result = create_user_admin(data, actor_id=actor_id)
 
     if not result["success"]:
         return jsonify(result), 400
@@ -135,8 +137,9 @@ def get_user(user_id):
 
 def edit_user(user_id):
     data = request.get_json() or {}
+    actor_id = session.get("user_id")
 
-    result = update_user(user_id, data)
+    result = update_user(user_id, data, actor_id=actor_id)
 
     if not result["success"]:
         status_code = 404 if result.get("message") == "User not found" else 400
@@ -146,10 +149,20 @@ def edit_user(user_id):
 
 
 def remove_user(user_id):
-    result = delete_user(user_id)
+    actor_id = session.get("user_id")
+
+    result = delete_user(user_id, actor_id=actor_id)
 
     if not result["success"]:
         status_code = 404 if result.get("message") == "User not found" else 400
         return jsonify(result), status_code
 
     return jsonify(result), 200
+
+
+def fetch_audit_logs():
+    logs = get_all_audit_logs()
+    return jsonify({
+        "success": True,
+        "data": logs
+    }), 200
