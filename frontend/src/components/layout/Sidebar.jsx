@@ -64,9 +64,14 @@ function Sidebar({ isOpen, onClose }) {
             </NavLink>
 
             {isAdmin && (
-                <NavLink to="/users" style={linkStyle} onClick={onClose}>
-                    👤 Users
-                </NavLink>
+                <>
+                    <NavLink to="/users" style={linkStyle} onClick={onClose}>
+                        👤 Users
+                    </NavLink>
+                    <NavLink to="/audit-logs" style={linkStyle} onClick={onClose}>
+                        📋 Audit Logs
+                    </NavLink>
+                </>
             )}
         </aside>
     );

@@ -31,3 +31,9 @@ Thumbs.db
 # Scratch & Temporary Logs
 scratch/
 *.log
+
+# CV Datasets & Model Weights
+cv/datasets/
+*.pt
+*.onnx
+*.engine

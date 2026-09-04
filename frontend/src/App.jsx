@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Detection from "./pages/Detection";
 import Users from "./pages/Users";
+import AuditLogs from "./pages/AuditLogs";
 
 function App() {
     return (
@@ -36,6 +37,15 @@ function App() {
                         element={
                             <ProtectedRoute allowedRoles={["ADMIN"]}>
                                 <Users />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/audit-logs"
+                        element={
+                            <ProtectedRoute allowedRoles={["ADMIN"]}>
+                                <AuditLogs />
                             </ProtectedRoute>
                         }
                     />

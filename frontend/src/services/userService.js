@@ -44,3 +44,8 @@ export const deleteUser = async (id) => {
     const response = await api.delete(`/users/${id}`);
     return response.data;
 };
+
+export const getAuditLogs = async () => {
+    const response = await api.get("/audit-logs");
+    return response.data;
+};

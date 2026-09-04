@@ -5,10 +5,16 @@ import DashboardStats from "../components/dashboard/DashboardStats";
 import AnalyticsCards from "../components/dashboard/AnalyticsCards";
 import SignalStatusChart from "../components/dashboard/SignalStatusChart";
 import SignalTimingChart from "../components/dashboard/SignalTimingChart";
+import VehicleTrendChart from "../components/dashboard/VehicleTrendChart";
+import CongestionDistributionChart from "../components/dashboard/CongestionDistributionChart";
+import TrafficHistoryTable from "../components/dashboard/TrafficHistoryTable";
+import TrafficSummaryCards from "../components/dashboard/TrafficSummaryCards";
 
 import {
     getDashboardStats,
-    getDashboardAnalytics
+    getDashboardAnalytics,
+    getTrafficHistory,
+    getTrafficSummary
 } from "../services/dashboardService";
 
 import SignalTable from "../components/signals/SignalTable";
@@ -39,7 +45,6 @@ function Dashboard() {
         total_users: 0
     });
 
-
     const [analytics, setAnalytics] = useState({
         total_green_time: 0,
         average_green_time: 0,
@@ -48,6 +53,9 @@ function Dashboard() {
         active_percentage: 0,
         inactive_percentage: 0
     });
+
+    const [trafficHistory, setTrafficHistory] = useState([]);
+    const [trafficSummary, setTrafficSummary] = useState(null);
 
     const [signals, setSignals] = useState([]);
     const [search, setSearch] = useState("");
@@ -62,6 +70,8 @@ function Dashboard() {
 
     const [actionLoading, setActionLoading] = useState(false);
     const [loadingDashboard, setLoadingDashboard] = useState(false);
+    const [loadingAnalytics, setLoadingAnalytics] = useState(false);
+    const [analyticsError, setAnalyticsError] = useState(null);
     const [apiError, setApiError] = useState(null);
     const [toastMessage, setToastMessage] = useState(null);
 
@@ -79,6 +89,9 @@ function Dashboard() {
 
     async function loadDashboard() {
         setLoadingDashboard(true);
+        setLoadingAnalytics(true);
+        setAnalyticsError(null);
+
         try {
             const [statsData, analyticsData] = await Promise.all([
                 getDashboardStats(),
@@ -90,6 +103,20 @@ function Dashboard() {
             console.error("Failed to load dashboard metrics:", error);
         } finally {
             setLoadingDashboard(false);
+        }
+
+        try {
+            const [historyRes, summaryRes] = await Promise.all([
+                getTrafficHistory(),
+                getTrafficSummary()
+            ]);
+            setTrafficHistory(historyRes.data || []);
+            setTrafficSummary(summaryRes.data || null);
+        } catch (error) {
+            console.error("Failed to load traffic analytics:", error);
+            setAnalyticsError(error);
+        } finally {
+            setLoadingAnalytics(false);
         }
     }
 
@@ -220,7 +247,6 @@ function Dashboard() {
                 )}
             </div>
 
-
             {/* Success Toast Banner */}
             {toastMessage && (
                 <div style={styles.toast}>
@@ -236,28 +262,49 @@ function Dashboard() {
 
             {/* Visual Analytics Charts Section */}
             <div style={styles.chartsSection}>
-                <h3 style={styles.sectionTitle}>📊 Traffic Analytics & Visualizations</h3>
+                <h3 style={styles.sectionTitle}>📊 Traffic Signal Configuration & Status</h3>
                 <div style={styles.chartsRow}>
                     <SignalStatusChart stats={stats} />
                     <SignalTimingChart signals={signals} />
                 </div>
             </div>
 
-            {/* Signals Table Section */}
-            <SignalFilter
-                search={search}
-                setSearch={setSearch}
-                status={status}
-                setStatus={setStatus}
-                onSearch={handleSearch}
-                onFilter={handleFilter}
-            />
+            {/* Advanced Historical Traffic Analytics Section */}
+            <div style={styles.chartsSection}>
+                <h3 style={styles.sectionTitle}>📈 Advanced Historical Traffic Detection Analytics</h3>
+                
+                <TrafficSummaryCards summary={trafficSummary} />
 
-            <SignalTable
-                signals={signals}
-                onEdit={handleOpenEditModal}
-                onDelete={handleOpenDeleteModal}
-            />
+                <div style={{ ...styles.chartsRow, marginTop: "16px" }}>
+                    <VehicleTrendChart history={trafficHistory} />
+                    <CongestionDistributionChart summary={trafficSummary} />
+                </div>
+
+                <TrafficHistoryTable
+                    history={trafficHistory}
+                    signals={signals}
+                    loading={loadingAnalytics}
+                    error={analyticsError}
+                />
+            </div>
+
+            {/* Signals Table Section */}
+            <div style={{ marginTop: "30px" }}>
+                <SignalFilter
+                    search={search}
+                    setSearch={setSearch}
+                    status={status}
+                    setStatus={setStatus}
+                    onSearch={handleSearch}
+                    onFilter={handleFilter}
+                />
+
+                <SignalTable
+                    signals={signals}
+                    onEdit={handleOpenEditModal}
+                    onDelete={handleOpenDeleteModal}
+                />
+            </div>
 
             {/* Add / Edit Signal Modal */}
             <SignalForm
