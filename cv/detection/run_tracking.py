@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 
 from cv.detection.tracker import VehicleTracker
 from cv.detection.counter import VehicleCounter
+from cv.detection.density import TrafficDensityEngine
 
 
 def process_video_tracking(
@@ -18,11 +19,15 @@ def process_video_tracking(
     conf_threshold=0.25,
     line_ratio=0.85,
     tracker_type="bytetrack.yaml",
+    density_low=4.0,
+    density_high=9.0,
+    smoothing_window=5,
     display=True,
     max_frames=None,
     start_frame=0,
     output_path=None
 ):
+
     """
     Process input video stream frame-by-frame with multi-object vehicle tracking & persistent line-crossing counting.
     Renders bounding boxes, track IDs, motion trails, virtual counting line, and HUD metrics.
@@ -53,6 +58,8 @@ def process_video_tracking(
     tracker = VehicleTracker(model_path=model_path, conf_threshold=conf_threshold, tracker_type=tracker_type)
     print(f"[INFO] Initializing VehicleCounter (line_ratio={line_ratio:.2f})...")
     counter = VehicleCounter(line_ratio=line_ratio)
+    print(f"[INFO] Initializing TrafficDensityEngine (low={density_low}, high={density_high}, window={smoothing_window})...")
+    density_engine = TrafficDensityEngine(low_threshold=density_low, high_threshold=density_high, smoothing_window=smoothing_window)
 
     writer = None
     if output_path:
@@ -68,9 +75,16 @@ def process_video_tracking(
         "truck": (0, 0, 255)         # Red
     }
 
+    CONGESTION_COLOR_MAP = {
+        "LOW": (0, 255, 0),          # Green
+        "MODERATE": (0, 215, 255),   # Gold / Yellow
+        "HIGH": (0, 0, 255)          # Red
+    }
+
     processed_count = 0
     start_time = time.time()
     prev_frame_time = time.time()
+    last_density_state = None
 
     try:
         while cap.isOpened():
@@ -88,6 +102,9 @@ def process_video_tracking(
 
             # Update line crossing vehicle counter
             newly_counted, line_y = counter.update(tracked_vehicles, res_height)
+
+            # Calculate current traffic density & congestion state
+            last_density_state = density_engine.process_active_vehicles(tracked_vehicles)
 
             # 1. Draw Virtual Counting Line
             cv2.line(frame, (0, line_y), (res_width, line_y), (0, 255, 255), 2)
@@ -142,19 +159,27 @@ def process_video_tracking(
             # 3. Render HUD (Heads-Up Display)
             counts_info = counter.get_counts()
             total_counted = counts_info["total_vehicles"]
-            cls_counts = counts_info["class_counts"]
+
+            active_cnt = last_density_state["active_vehicle_count"]
+            smoothed_cnt = last_density_state["smoothed_vehicle_count"]
+            density_lvl = last_density_state["density_level"]
+            congestion_lvl = last_density_state["congestion_level"]
+            active_cls = last_density_state["class_counts"]
+
+            cong_color = CONGESTION_COLOR_MAP.get(congestion_lvl, (255, 255, 255))
 
             hud_bg = (20, 20, 20)
-            cv2.rectangle(frame, (10, 10), (360, 135), hud_bg, -1)
-            cv2.rectangle(frame, (10, 10), (360, 135), (0, 255, 255), 1)
+            cv2.rectangle(frame, (10, 10), (410, 160), hud_bg, -1)
+            cv2.rectangle(frame, (10, 10), (410, 160), (0, 255, 255), 1)
 
-            cv2.putText(frame, "TRAFFIC TRACKING & COUNTING HUD", (20, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1, cv2.LINE_AA)
-            cv2.putText(frame, f"FPS: {fps:.1f} | Frame: {current_frame_idx}/{total_frames}", (20, 48), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1, cv2.LINE_AA)
-            cv2.putText(frame, f"Active Vehicles in Frame: {len(tracked_vehicles)}", (20, 68), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1, cv2.LINE_AA)
-            cv2.putText(frame, f"TOTAL UNIQUE VEHICLES: {total_counted}", (20, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 255, 0), 2, cv2.LINE_AA)
+            cv2.putText(frame, "TRAFFIC DENSITY & TRACKING HUD", (20, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1, cv2.LINE_AA)
+            cv2.putText(frame, f"FPS: {fps:.1f} | Frame: {current_frame_idx}/{total_frames}", (20, 48), cv2.FONT_HERSHEY_SIMPLEX, 0.42, (255, 255, 255), 1, cv2.LINE_AA)
+            cv2.putText(frame, f"ACTIVE VEHICLES: {active_cnt} (Smooth: {smoothed_cnt:.1f})", (20, 68), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1, cv2.LINE_AA)
+            cv2.putText(frame, f"TOTAL UNIQUE VEHICLES: {total_counted}", (20, 88), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 1, cv2.LINE_AA)
+            cv2.putText(frame, f"DENSITY: {density_lvl} | CONGESTION: {congestion_lvl}", (20, 112), cv2.FONT_HERSHEY_SIMPLEX, 0.5, cong_color, 2, cv2.LINE_AA)
             
-            cls_str = f"Car: {cls_counts['car']} | Truck: {cls_counts['truck']} | Bus: {cls_counts['bus']} | Moto: {cls_counts['motorcycle']}"
-            cv2.putText(frame, cls_str, (20, 115), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (200, 200, 200), 1, cv2.LINE_AA)
+            cls_str = f"Active: Car:{active_cls['car']} | Trk:{active_cls['truck']} | Bus:{active_cls['bus']} | Moto:{active_cls['motorcycle']}"
+            cv2.putText(frame, cls_str, (20, 138), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (200, 200, 200), 1, cv2.LINE_AA)
 
             if writer:
                 writer.write(frame)
@@ -180,14 +205,20 @@ def process_video_tracking(
             cv2.destroyAllWindows()
 
         final_counts = counter.get_counts()
-        print(f"\n=== VEHICLE TRACKING & COUNTING SUMMARY ===")
+        print(f"\n=== VEHICLE TRACKING & DENSITY SUMMARY ===")
         print(f"Total Frames Processed : {processed_count}")
         print(f"Total Elapsed Time     : {total_time:.2f} seconds")
         print(f"Average Processing FPS : {avg_fps:.1f}")
         print(f"Total Unique Vehicles  : {final_counts['total_vehicles']}")
-        print(f"Class Breakdown        : {final_counts['class_counts']}")
+        if last_density_state:
+            print(f"Final Active Vehicles  : {last_density_state['active_vehicle_count']} (Smoothed: {last_density_state['smoothed_vehicle_count']})")
+            print(f"Final Density Level    : {last_density_state['density_level']}")
+            print(f"Final Congestion Level : {last_density_state['congestion_level']}")
+            print(f"Final Active Classes   : {last_density_state['class_counts']}")
+        print(f"Cumulative Class Count : {final_counts['class_counts']}")
 
     return True
+
 
 
 if __name__ == "__main__":
@@ -235,6 +266,24 @@ if __name__ == "__main__":
         help="Maximum frames to process"
     )
     parser.add_argument(
+        "--density-low",
+        type=float,
+        default=4.0,
+        help="Vehicle count threshold for LOW density classification"
+    )
+    parser.add_argument(
+        "--density-high",
+        type=float,
+        default=9.0,
+        help="Vehicle count threshold for HIGH density classification"
+    )
+    parser.add_argument(
+        "--smoothing-window",
+        type=int,
+        default=5,
+        help="Window size for moving-average density smoothing"
+    )
+    parser.add_argument(
         "--no-display",
         action="store_true",
         help="Disable GUI display window (headless mode)"
@@ -253,8 +302,12 @@ if __name__ == "__main__":
         conf_threshold=args.conf,
         line_ratio=args.line_ratio,
         tracker_type=args.tracker,
+        density_low=args.density_low,
+        density_high=args.density_high,
+        smoothing_window=args.smoothing_window,
         display=not args.no_display,
         max_frames=args.max_frames,
         start_frame=args.start_frame,
         output_path=args.output
     )
+
