@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..",
 from cv.detection.tracker import VehicleTracker
 from cv.detection.counter import VehicleCounter
 from cv.detection.density import TrafficDensityEngine
+from cv.detection.signal_optimizer import DynamicSignalOptimizer
 
 
 def process_video_tracking(
@@ -22,11 +23,17 @@ def process_video_tracking(
     density_low=4.0,
     density_high=9.0,
     smoothing_window=5,
+    min_green=20,
+    max_green=60,
+    yellow_time=5,
+    min_red=20,
+    vehicle_multiplier=3,
     display=True,
     max_frames=None,
     start_frame=0,
     output_path=None
 ):
+
 
     """
     Process input video stream frame-by-frame with multi-object vehicle tracking & persistent line-crossing counting.
@@ -60,6 +67,15 @@ def process_video_tracking(
     counter = VehicleCounter(line_ratio=line_ratio)
     print(f"[INFO] Initializing TrafficDensityEngine (low={density_low}, high={density_high}, window={smoothing_window})...")
     density_engine = TrafficDensityEngine(low_threshold=density_low, high_threshold=density_high, smoothing_window=smoothing_window)
+    print(f"[INFO] Initializing DynamicSignalOptimizer (min_green={min_green}, max_green={max_green}, yellow={yellow_time}, min_red={min_red}, mult={vehicle_multiplier})...")
+    signal_optimizer = DynamicSignalOptimizer(
+        base_green=20,
+        time_per_vehicle=vehicle_multiplier,
+        min_green=min_green,
+        max_green=max_green,
+        yellow_time=yellow_time,
+        min_red=min_red
+    )
 
     writer = None
     if output_path:
@@ -85,6 +101,7 @@ def process_video_tracking(
     start_time = time.time()
     prev_frame_time = time.time()
     last_density_state = None
+    last_signal_rec = None
 
     try:
         while cap.isOpened():
@@ -105,6 +122,9 @@ def process_video_tracking(
 
             # Calculate current traffic density & congestion state
             last_density_state = density_engine.process_active_vehicles(tracked_vehicles)
+
+            # Calculate dynamic traffic signal timing recommendation
+            last_signal_rec = signal_optimizer.recommend_signal_timing(last_density_state)
 
             # 1. Draw Virtual Counting Line
             cv2.line(frame, (0, line_y), (res_width, line_y), (0, 255, 255), 2)
@@ -166,26 +186,36 @@ def process_video_tracking(
             congestion_lvl = last_density_state["congestion_level"]
             active_cls = last_density_state["class_counts"]
 
+            rec_green = last_signal_rec["recommended_green_time"]
+            rec_yellow = last_signal_rec["yellow_time"]
+            rec_red = last_signal_rec["red_time"]
+            sig_state = last_signal_rec["traffic_state"]
+
             cong_color = CONGESTION_COLOR_MAP.get(congestion_lvl, (255, 255, 255))
 
             hud_bg = (20, 20, 20)
-            cv2.rectangle(frame, (10, 10), (410, 160), hud_bg, -1)
-            cv2.rectangle(frame, (10, 10), (410, 160), (0, 255, 255), 1)
+            cv2.rectangle(frame, (10, 10), (450, 215), hud_bg, -1)
+            cv2.rectangle(frame, (10, 10), (450, 215), (0, 255, 255), 1)
 
-            cv2.putText(frame, "TRAFFIC DENSITY & TRACKING HUD", (20, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1, cv2.LINE_AA)
+            cv2.putText(frame, "TRAFFIC DENSITY & SIGNAL OPTIMIZER HUD", (20, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.48, (0, 255, 255), 1, cv2.LINE_AA)
             cv2.putText(frame, f"FPS: {fps:.1f} | Frame: {current_frame_idx}/{total_frames}", (20, 48), cv2.FONT_HERSHEY_SIMPLEX, 0.42, (255, 255, 255), 1, cv2.LINE_AA)
             cv2.putText(frame, f"ACTIVE VEHICLES: {active_cnt} (Smooth: {smoothed_cnt:.1f})", (20, 68), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1, cv2.LINE_AA)
             cv2.putText(frame, f"TOTAL UNIQUE VEHICLES: {total_counted}", (20, 88), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 1, cv2.LINE_AA)
-            cv2.putText(frame, f"DENSITY: {density_lvl} | CONGESTION: {congestion_lvl}", (20, 112), cv2.FONT_HERSHEY_SIMPLEX, 0.5, cong_color, 2, cv2.LINE_AA)
+            cv2.putText(frame, f"DENSITY: {density_lvl} | CONGESTION: {congestion_lvl}", (20, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.45, cong_color, 2, cv2.LINE_AA)
             
             cls_str = f"Active: Car:{active_cls['car']} | Trk:{active_cls['truck']} | Bus:{active_cls['bus']} | Moto:{active_cls['motorcycle']}"
-            cv2.putText(frame, cls_str, (20, 138), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (200, 200, 200), 1, cv2.LINE_AA)
+            cv2.putText(frame, cls_str, (20, 132), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (200, 200, 200), 1, cv2.LINE_AA)
+
+            # Signal Recommendation Overlay
+            cv2.line(frame, (20, 145), (440, 145), (100, 100, 100), 1)
+            cv2.putText(frame, f"RECOMMENDED GREEN: {rec_green} sec", (20, 168), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
+            cv2.putText(frame, f"YELLOW: {rec_yellow}s | RED: {rec_red}s | STATE: {sig_state}", (20, 192), cv2.FONT_HERSHEY_SIMPLEX, 0.42, (255, 255, 255), 1, cv2.LINE_AA)
 
             if writer:
                 writer.write(frame)
 
             if display:
-                cv2.imshow("Smart Traffic Management System - Vehicle Tracking & Counting", frame)
+                cv2.imshow("Smart Traffic Management System - Vehicle Tracking & Signal Optimizer", frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     print("[INFO] User pressed 'q'. Exiting tracking pipeline...")
                     break
@@ -205,7 +235,7 @@ def process_video_tracking(
             cv2.destroyAllWindows()
 
         final_counts = counter.get_counts()
-        print(f"\n=== VEHICLE TRACKING & DENSITY SUMMARY ===")
+        print(f"\n=== VEHICLE TRACKING & SIGNAL OPTIMIZER SUMMARY ===")
         print(f"Total Frames Processed : {processed_count}")
         print(f"Total Elapsed Time     : {total_time:.2f} seconds")
         print(f"Average Processing FPS : {avg_fps:.1f}")
@@ -215,9 +245,15 @@ def process_video_tracking(
             print(f"Final Density Level    : {last_density_state['density_level']}")
             print(f"Final Congestion Level : {last_density_state['congestion_level']}")
             print(f"Final Active Classes   : {last_density_state['class_counts']}")
+        if last_signal_rec:
+            print(f"Recommended Green Time : {last_signal_rec['recommended_green_time']} sec")
+            print(f"Yellow / Red Allocation: Yellow={last_signal_rec['yellow_time']}s | Red={last_signal_rec['red_time']}s")
+            print(f"Signal Traffic State   : {last_signal_rec['traffic_state']}")
+            print(f"Recommendation Reason  : {last_signal_rec['reason']}")
         print(f"Cumulative Class Count : {final_counts['class_counts']}")
 
     return True
+
 
 
 
@@ -284,6 +320,36 @@ if __name__ == "__main__":
         help="Window size for moving-average density smoothing"
     )
     parser.add_argument(
+        "--min-green",
+        type=int,
+        default=20,
+        help="Minimum recommended green signal time in seconds"
+    )
+    parser.add_argument(
+        "--max-green",
+        type=int,
+        default=60,
+        help="Maximum recommended green signal time in seconds"
+    )
+    parser.add_argument(
+        "--yellow-time",
+        type=int,
+        default=5,
+        help="Fixed yellow signal time in seconds"
+    )
+    parser.add_argument(
+        "--min-red",
+        type=int,
+        default=20,
+        help="Minimum red signal clearance time in seconds"
+    )
+    parser.add_argument(
+        "--vehicle-multiplier",
+        type=float,
+        default=3.0,
+        help="Seconds of green time added per active vehicle"
+    )
+    parser.add_argument(
         "--no-display",
         action="store_true",
         help="Disable GUI display window (headless mode)"
@@ -305,9 +371,15 @@ if __name__ == "__main__":
         density_low=args.density_low,
         density_high=args.density_high,
         smoothing_window=args.smoothing_window,
+        min_green=args.min_green,
+        max_green=args.max_green,
+        yellow_time=args.yellow_time,
+        min_red=args.min_red,
+        vehicle_multiplier=args.vehicle_multiplier,
         display=not args.no_display,
         max_frames=args.max_frames,
         start_frame=args.start_frame,
         output_path=args.output
     )
+
 
