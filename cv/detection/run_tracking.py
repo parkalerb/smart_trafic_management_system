@@ -14,6 +14,39 @@ from cv.detection.density import TrafficDensityEngine
 from cv.detection.signal_optimizer import DynamicSignalOptimizer
 
 
+def fit_frame_to_canvas(frame, canvas_width=1280, canvas_height=720):
+    """
+    Scale a frame down to fit centered inside a black canvas of canvas_width x canvas_height.
+    Preserves exact aspect ratio using uniform scaling and letterbox/pillarbox padding.
+    Never crops or distorts top/bottom/sides.
+    """
+    if frame is None or frame.size == 0:
+        return frame
+
+    h, w = frame.shape[:2]
+    scale = min(canvas_width / float(w), canvas_height / float(h))
+
+    new_w = max(1, int(w * scale))
+    new_h = max(1, int(h * scale))
+
+    if new_w != w or new_h != h:
+        interp = cv2.INTER_AREA if scale < 1.0 else cv2.INTER_LINEAR
+        resized_frame = cv2.resize(frame, (new_w, new_h), interpolation=interp)
+    else:
+        resized_frame = frame
+
+    # Create solid black canvas
+    canvas = np.zeros((canvas_height, canvas_width, 3), dtype=np.uint8)
+
+    # Compute centering offsets
+    x_offset = (canvas_width - new_w) // 2
+    y_offset = (canvas_height - new_h) // 2
+
+    canvas[y_offset:y_offset + new_h, x_offset:x_offset + new_w] = resized_frame
+
+    return canvas
+
+
 def process_video_tracking(
     video_path,
     model_path="yolov8n.pt",
@@ -33,8 +66,6 @@ def process_video_tracking(
     start_frame=0,
     output_path=None
 ):
-
-
     """
     Process input video stream frame-by-frame with multi-object vehicle tracking & persistent line-crossing counting.
     Renders bounding boxes, track IDs, motion trails, virtual counting line, and HUD metrics.
@@ -56,6 +87,23 @@ def process_video_tracking(
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     print(f"[INFO] Video Info: Resolution = {res_width}x{res_height} | Native FPS = {video_fps:.1f} | Total Frames = {total_frames}")
+
+    window_name = "Smart Traffic Management System - Vehicle Tracking & Signal Optimizer"
+    is_portrait = res_height > res_width
+
+    # Default initial window dimensions for normal view
+    if is_portrait:
+        default_win_w = 450
+        default_win_h = 800
+    else:
+        default_win_w = 1280
+        default_win_h = 720
+
+    if display:
+        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(window_name, default_win_w, default_win_h)
+
+
 
     if start_frame > 0:
         print(f"[INFO] Seeking to frame {start_frame}...")
@@ -215,10 +263,23 @@ def process_video_tracking(
                 writer.write(frame)
 
             if display:
-                cv2.imshow("Smart Traffic Management System - Vehicle Tracking & Signal Optimizer", frame)
+                try:
+                    rect = cv2.getWindowImageRect(window_name)
+                    if rect and len(rect) >= 4 and rect[2] > 0 and rect[3] > 0:
+                        cur_win_w, cur_win_h = rect[2], rect[3]
+                    else:
+                        cur_win_w, cur_win_h = default_win_w, default_win_h
+                except Exception:
+                    cur_win_w, cur_win_h = default_win_w, default_win_h
+
+                display_canvas = fit_frame_to_canvas(frame, canvas_width=cur_win_w, canvas_height=cur_win_h)
+                cv2.imshow(window_name, display_canvas)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     print("[INFO] User pressed 'q'. Exiting tracking pipeline...")
                     break
+
+
+
 
             if max_frames and processed_count >= max_frames:
                 print(f"[INFO] Reached max_frames limit ({max_frames}). Stopping run.")
